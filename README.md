@@ -5,7 +5,7 @@ Project for Intro to Data Science, Fall 2022
 
 The aim of the project is to use exploratory data analysis to answer SMART questions about a dataset.
 
-# DATA
+# Data
 The data for this project is from a movie recommendation system called MovieLens. This contains different movies, their genres, and various ratings.
 
 # SMART Questions

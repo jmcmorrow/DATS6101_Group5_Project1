@@ -7,11 +7,11 @@ The aim of the project is to use exploratory data analysis to answer SMART quest
 
 ## Research Background:
 
-For a long time, we’ve liked to engross ourselves in fables and stories for ranging purposes. Cinema has become the modern medium to achieve this. From documentaries to action thrillers, it has become an integral part of any community; movies mirror what we believe and help redefine the narrative on how we see others in the world. Whether they’re utilized as a medium to relax after work or school, address key issues to drive social change, or therapeutically to tackle mental health, movies drive and shape our societies.
+For a long time, we have liked to engross ourselves in fables and stories for ranging purposes. Cinema has become the modern medium to achieve this. From documentaries to action thrillers, it has become an integral part of any community; movies mirror what we believe and help redefine the narrative on how we see others, and our role, in the world. Whether they are utilized as a medium to relax after work or school, address key issues to drive social change, or therapeutically to tackle mental health, movies drive and help shape our societies.
 
 ## Proposal and Dataset:
 
-GroupLens is a research lab in the Dept. of Computer Science of University of Minnesota, which among other things, specializes in a movie recommendation system through MovieLens, that utilizes user ratings to recommend movies to its users. Using two datasets, one with 10,329 movies and their genres, and another with 105,339 IMDB ratings (scale of 5) across 668 Users (selected randomly) between March 1996 and September 2018, we can perform exciting exploratory analysis of movie ratings, genres, and user preference. We have compiled both datasets into a single dataset and also split the genres variable into multiple unique rows to be able to utilize them. This has increased the observations of the final dataset to 299,937.
+GroupLens is a research lab in the Department of Computer Science of University of Minnesota, which among other things, specializes in a movie recommendation system through MovieLens, that utilizes user ratings to recommend movies to its users. Using two datasets, one with 10,329 movies and their genres, and another with 105,339 IMDB ratings (scale of 5) across 668 Users (selected randomly) between March 1996 and September 2018, we can perform exciting exploratory analysis of movie ratings, genres, and user preference. We have compiled both datasets into a single dataset and also split the genres variable into multiple unique rows to be able to utilize them. This has increased the observations of the final dataset to 299,937.
 
 ## SMART Questions
 

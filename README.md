@@ -26,8 +26,6 @@ Some SMART questions we want to explore are the following:
 
 This could provide good insight into certain biases when it comes to rating movies, genres watched most by viewers, and how this could affect movie recommendation systems.
 
-## Repository & Dataset Source
+## Dataset Source
 
-Dataset Source: Click HERE to view the source of our dataset.
-
-Github Repo: Follow this LINK to view our GitHub repository.
+Dataset Source: Click [here](https://grouplens.org/datasets/movielens/latest/) to view the source of our dataset.

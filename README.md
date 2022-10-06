@@ -24,7 +24,7 @@ Some SMART questions we want to explore are the following:
 * Which movie displays the maximum mixed reviews from the user population between March 1996 and September 2018?
 * Which genre displays the maximum mixed reviews, using the movies in the sample, from the user population between March 1996 and September 2018?
 
-This could provide good insight to certain biases when it comes to rating movies, genres watched most by viewers, and how this could affect movie recommendation systems.
+This could provide good insight into certain biases when it comes to rating movies, genres watched most by viewers, and how this could affect movie recommendation systems.
 
 ## Repository & Dataset Source
 

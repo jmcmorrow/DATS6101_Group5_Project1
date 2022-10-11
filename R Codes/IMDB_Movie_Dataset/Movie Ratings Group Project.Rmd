@@ -1,0 +1,54 @@
+---
+title: "Movie Ratings Group Project"
+author: "Group 5"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Importing Data
+```{r}
+rm(list=ls())
+library(tidyverse)
+
+movies <- read_csv("movies.csv")
+ratings <- read_csv("ratings.csv")
+
+str(movies)
+str(ratings)
+```
+
+Expanding Movies Dataset
+```{r}
+library(data.table)
+movies <- data.table(movies)
+movies_expanded <- movies[ , list(genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+
+# remove spaces
+movies_expanded$genres <- str_trim(movies_expanded$genres)
+str(movies_expanded)
+```
+
+Joining Datasets
+```{r}
+movies_drop <- movies %>% select(-3)
+movies_join <- left_join(movies_expanded, movies_drop, by = "movieId")
+data <- full_join(movies_join, ratings, by = "movieId")
+```
+
+```{r}
+unique(movies_join$genres)
+```
+
+20 different genres
+
+Some issues with the final dataset:
+* There are multiple genres per movie and multiple reviews per movie. This means the review ratings are duplicated in the final dataset in movies with multiple genres after they have been expanded. We might want to join the datasets with all genres listed in one column instead.
+* Overlap of genres between different movies might cause some issues.
+* The dataset is very long. We might want to subset it to those movies with just one genre (which would address the issue above), or perhaps narrow it down to a certain time frame.
+* The timestamp variable is being interpreted as numeric. We will need to figure out how to fix this.
+
+

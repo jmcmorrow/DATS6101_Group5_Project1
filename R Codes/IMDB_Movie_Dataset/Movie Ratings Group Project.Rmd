@@ -32,6 +32,19 @@ movies_expanded$genres <- str_trim(movies_expanded$genres)
 str(movies_expanded)
 ```
 
+Checking Movies with only one genre listed
+```{r}
+movies_expanded %>%
+  group_by(movieId) %>%
+  summarize(
+    count = n()
+  ) %>%
+  filter(count == 1)
+```
+
+3,041 movies have only one genre listed (29.4%)
+*Might be able to perform a chi-squared goodness of fit test to see if there is any bias between movies with only one genre listed versus those with multiple genres*
+
 Joining Datasets
 ```{r}
 movies_drop <- movies %>% select(-3)

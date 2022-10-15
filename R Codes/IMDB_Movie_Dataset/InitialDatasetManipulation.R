@@ -14,5 +14,7 @@ max(is.na(movie_ratings))
 library(magrittr)
 library(tidyverse)
 movie_ratings <- movie_ratings %>% separate_rows(genres)
+movies <- movies %>% separate_rows(genres)
+unique(movies$genres)
   
 

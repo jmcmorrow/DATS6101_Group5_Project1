@@ -32,6 +32,19 @@ movies_expanded$genres <- str_trim(movies_expanded$genres)
 str(movies_expanded)
 ```
 
+Checking Movies with only one genre listed
+```{r}
+movies_expanded %>%
+  group_by(movieId) %>%
+  summarize(
+    count = n()
+  ) %>%
+  filter(count == 1)
+```
+
+3,041 movies have only one genre listed (29.4%)
+*Might be able to perform a chi-squared goodness of fit test to see if there is any bias between movies with only one genre listed versus those with multiple genres*
+
 Joining Datasets
 ```{r}
 movies_drop <- movies %>% select(-3)
@@ -41,6 +54,7 @@ data <- full_join(movies_join, ratings, by = "movieId")
 
 ```{r}
 unique(movies_join$genres)
+sum(is.na(movies_join$genres))
 ```
 
 20 different genres
@@ -50,5 +64,12 @@ Some issues with the final dataset:
 * Overlap of genres between different movies might cause some issues.
 * The dataset is very long. We might want to subset it to those movies with just one genre (which would address the issue above), or perhaps narrow it down to a certain time frame.
 * The timestamp variable is being interpreted as numeric. We will need to figure out how to fix this.
+
+*Extract year from movie titles*
+
+Columns to make:
+* Average user ratings per movie
+* Number of ratings per movie
+
 
 

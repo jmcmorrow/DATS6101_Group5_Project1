@@ -34,16 +34,18 @@ str(movies_expanded)
 
 Checking Movies with only one genre listed
 ```{r}
-movies_expanded %>%
+movie_count_one <- movies_expanded %>%
   group_by(movieId) %>%
   summarize(
     count = n()
   ) %>%
   filter(count == 1)
+movie_count_one
 ```
 
 3,041 movies have only one genre listed (29.4%)
 *Might be able to perform a chi-squared goodness of fit test to see if there is any bias between movies with only one genre listed versus those with multiple genres*
+
 
 Joining Datasets
 ```{r}
@@ -51,6 +53,56 @@ movies_drop <- movies %>% select(-3)
 movies_join <- left_join(movies_expanded, movies_drop, by = "movieId")
 data <- full_join(movies_join, ratings, by = "movieId")
 ```
+
+Subsetting Movies with one genre
+```{r}
+one_genre <- inner_join(movies_join, movie_count_one)
+one_genre
+```
+
+Finding proportion of genres
+```{r}
+one_genre_prop <- one_genre %>%
+  group_by(genres) %>%
+  summarize(
+    count = n(),
+    prop = n() / 3041
+  )
+
+one_genre_prop <- one_genre_prop[order(one_genre_prop$prop, decreasing = T),]
+one_genre_prop
+```
+
+```{r}
+all_movies_prop <- movies_join %>%
+  group_by(genres) %>%
+  summarize(
+    count = n(),
+    prop = n() / 10329
+  )
+
+all_movies_prop <- all_movies_prop[order(all_movies_prop$prop, decreasing = T),]
+all_movies_prop
+```
+
+One genre category is missing the IMAX category
+```{r}
+prop_join <- full_join(one_genre_prop, all_movies_prop, by = "genres")
+prop_join <- rename(prop_join,
+       count_one = count.x,
+       prop_one = prop.x,
+       count_all = count.y,
+       prop_all = prop.y)
+prop_join[is.na(prop_join)] = 0
+prop_join
+```
+
+Doing a Chi-squared Goodness of fit test to see if proportions of one genre are different from all of the genres
+```{r}
+chisq.test(prop_join$count_one, p = prop_join$prop_all)
+```
+
+Chi-squared test does not work because the proportion of genres does not equal 1. We'll have to think of another way to see if these two stats are significantly different
 
 ```{r}
 unique(movies_join$genres)
@@ -70,6 +122,7 @@ Some issues with the final dataset:
 Columns to make:
 * Average user ratings per movie
 * Number of ratings per movie
+* Year movie is made
 
 
 

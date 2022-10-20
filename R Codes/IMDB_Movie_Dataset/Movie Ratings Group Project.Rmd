@@ -125,4 +125,105 @@ Columns to make:
 * Year movie is made
 
 
+```{r}
+rating_mean <- ratings %>%
+  group_by(movieId) %>%
+  summarize(
+    mean_rating = mean(rating)
+  )
+
+movies_rating <- left_join(movies, rating_mean, by = 'movieId')
+movies_rating
+```
+
+Expanding with Movie Ratings
+```{r}
+library(data.table)
+movies_rating <- data.table(movies_rating)
+movies_rating_expanded <- movies_rating[ , list(genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+
+# remove spaces
+movies_rating_expanded$genres <- str_trim(movies_rating_expanded$genres)
+
+# rejoining tables
+movies_rating <- select(movies_rating, -genres)
+movies_rating_expanded <- full_join(movies_rating_expanded, movies_rating, by = 'movieId')
+str(movies_rating_expanded)
+```
+
+Creating Year Variable
+```{r}
+movies_rating_expanded$year <- str_sub(movies_rating_expanded$title, start = nchar(movies_rating_expanded$title)-4, end = nchar(movies_rating_expanded$title)-1) %>% str_trim()
+movies_rating_expanded$year <- as.factor(movies_rating_expanded$year)
+str(movies_rating_expanded)
+```
+
+
+```{r}
+rating_by_genre <- movies_rating_expanded %>%
+  group_by(genres) %>%
+  summarize(
+    Count = n(),
+    Mean = mean(mean_rating, na.rm=T),
+    SD = sd(mean_rating, na.rm=T),
+    Min = min(mean_rating, na.rm=T),
+    Max = max(mean_rating, na.rm=T)
+  )
+
+rating_by_genre <- rating_by_genre[order(rating_by_genre$Mean, decreasing = TRUE),]
+rating_by_genre
+```
+
+```{r}
+rating_by_genre %>%
+  ggplot(
+    aes(
+      x = fct_reorder(genres, Count, .desc = T),
+      y = Mean
+    )
+  ) +
+  geom_col(fill = "lightblue", color = "black") +
+  labs(
+    title = "User Movie Rating by Genre",
+    x = "Genre",
+    y = "Average User Rating (0-5)"
+  ) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Calculating Rating by Year
+```{r}
+rating_by_year <- movies_rating_expanded %>%
+  group_by(year) %>%
+  summarize(
+    Count = n(),
+    Mean = mean(mean_rating, na.rm=T),
+    SD = sd(mean_rating, na.rm=T),
+    Min = min(mean_rating, na.rm=T),
+    Max = max(mean_rating, na.rm=T)
+  )
+
+rating_by_year <- rating_by_year[order(rating_by_year$year),]
+rating_by_year
+```
+
+```{r}
+rating_by_year %>%
+  ggplot(
+    aes(
+      x = year,
+      y = Mean
+    )
+  ) + 
+  geom_col(fill = "lightblue") +
+   labs(
+    title = "User Movie Rating by Year",
+    x = "Year",
+    y = "Average User Rating (0-5)"
+  ) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
 

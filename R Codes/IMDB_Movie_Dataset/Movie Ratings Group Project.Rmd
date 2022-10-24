@@ -21,6 +21,8 @@ str(movies)
 str(ratings)
 ```
 
+## Data Proprocessing
+
 Expanding Movies Dataset
 ```{r}
 library(data.table)
@@ -99,7 +101,7 @@ prop_join
 
 Doing a Chi-squared Goodness of fit test to see if proportions of one genre are different from all of the genres
 ```{r}
-chisq.test(prop_join$count_one, p = prop_join$prop_all)
+# chisq.test(prop_join$count_one, p = prop_join$prop_all)
 ```
 
 Chi-squared test does not work because the proportion of genres does not equal 1. We'll have to think of another way to see if these two stats are significantly different
@@ -124,6 +126,51 @@ Columns to make:
 * Number of ratings per movie
 * Year movie is made
 
+```{r}
+genre_list <- list(unique(movies_join$genres))
+for (g in genre_list) {
+  movie_wide <- movies %>%
+    mutate(
+      g = if_else(grepl(g, movies$genres), 1, 0)
+    )
+}
+
+str(movie_wide)
+unique(movies_join$genres)
+```
+
+Creating New Variables
+```{r}
+movie_wide <- movies %>%
+  mutate(
+    Adventure = if_else(grepl("Adventure", movies$genres), 1, 0),
+    Animation = if_else(grepl("Animation", movies$genres), 1, 0),
+    Children = if_else(grepl("Children", movies$genres), 1, 0),
+    Comedy = if_else(grepl("Comedy", movies$genres), 1, 0),
+    Fantasy = if_else(grepl("Fantasy", movies$genres), 1, 0),
+    Romance = if_else(grepl("Romance", movies$genres), 1, 0),
+    Drama = if_else(grepl("Drama", movies$genres), 1, 0),
+    Action = if_else(grepl("Action", movies$genres), 1, 0),
+    Crime = if_else(grepl("Crime", movies$genres), 1, 0),
+    Thriller = if_else(grepl("Thriller", movies$genres), 1, 0),
+    Horror = if_else(grepl("Horror", movies$genres), 1, 0),
+    Mystery = if_else(grepl("Mystery", movies$genres), 1, 0),
+    `Sci-Fi` = if_else(grepl("Sci-Fi", movies$genres), 1, 0),
+    IMAX = if_else(grepl("IMAX", movies$genres), 1, 0),
+    War = if_else(grepl("Adventure", movies$genres), 1, 0),
+    Musical = if_else(grepl("Musical", movies$genres), 1, 0),
+    Documentary = if_else(grepl("Documentary", movies$genres), 1, 0),
+    Western = if_else(grepl("Western", movies$genres), 1, 0),
+    `Film-Noir` = if_else(grepl("Film-Noir", movies$genres), 1, 0),
+    No_genre_listed = if_else(grepl("(no genres listed)", movies$genres), 1, 0)
+  )
+str(movie_wide)
+```
+
+```{r}
+sapply(movie_wide, mean)
+```
+
 
 ```{r}
 rating_mean <- ratings %>%
@@ -132,7 +179,7 @@ rating_mean <- ratings %>%
     mean_rating = mean(rating)
   )
 
-movies_rating <- left_join(movies, rating_mean, by = 'movieId')
+movies_rating <- left_join(movie_wide, rating_mean, by = 'movieId')
 movies_rating
 ```
 
@@ -155,9 +202,14 @@ Creating Year Variable
 ```{r}
 movies_rating_expanded$year <- str_sub(movies_rating_expanded$title, start = nchar(movies_rating_expanded$title)-4, end = nchar(movies_rating_expanded$title)-1) %>% str_trim()
 movies_rating_expanded$year <- as.factor(movies_rating_expanded$year)
-str(movies_rating_expanded)
+
+movie_wide$year <- str_sub(movie_wide$title, start = nchar(movie_wide$title)-4, end = nchar(movie_wide$title)-1) %>% str_trim()
+movie_wide$year <- as.factor(movie_wide$year)
+
+str(movie_wide)
 ```
 
+## Data Visualization
 
 ```{r}
 rating_by_genre <- movies_rating_expanded %>%
@@ -225,5 +277,19 @@ rating_by_year %>%
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 90))
 ```
+
+## Statistical Testing
+Testing Adventure
+```{r}
+Adventure <- movies_rating %>% filter(Adventure == 1)
+Not_adventure <- movies_rating %>% filter(Adventure == 0)
+
+t.test(Adventure$mean_rating)
+t.test(Adventure$mean_rating, Not_adventure$mean_rating)
+```
+
+95% Confidence Interval for Adventure Movies: 3.16 - 3.25.
+
+Two-sample t-test has a p-value of 0.2, so we cannot reject null hypothesis that Adventure movies score higher than all other movies.
 
 

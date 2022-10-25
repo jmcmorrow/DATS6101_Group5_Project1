@@ -28,16 +28,16 @@ Expanding Movies Dataset
 ```{r}
 library(data.table)
 movies <- data.table(movies)
-movies_expanded <- movies[ , list(genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+dummy_movie_genre_expanded <- movies[, list(title,genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
 
 # remove spaces
-movies_expanded$genres <- str_trim(movies_expanded$genres)
-str(movies_expanded)
+dummy_movie_genre_expanded$genres <- str_trim(dummy_movie_genre_expanded$genres)
+str(dummy_movie_genre_expanded)
 ```
 
 Checking Movies with only one genre listed
-```{r}
-movie_count_one <- movies_expanded %>%
+```{r, eval = F}
+movie_count_one <- movie_genre_expanded %>%
   group_by(movieId) %>%
   summarize(
     count = n()
@@ -52,19 +52,19 @@ movie_count_one
 
 Joining Datasets
 ```{r}
-movies_drop <- movies %>% select(-3)
-movies_join <- left_join(movies_expanded, movies_drop, by = "movieId")
-data <- full_join(movies_join, ratings, by = "movieId")
+#movies_drop <- movies %>% select(-3)
+#movies_join <- left_join(movie_genre_expanded, movies_drop, by = "movieId")
+movie_ratings_expanded <- full_join(dummy_movie_genre_expanded, ratings, by = "movieId")
 ```
 
 Subsetting Movies with one genre
-```{r}
+```{r, eval=F}
 one_genre <- inner_join(movies_join, movie_count_one)
 one_genre
 ```
 
 Finding proportion of genres
-```{r}
+```{r,eval=F}
 one_genre_prop <- one_genre %>%
   group_by(genres) %>%
   summarize(
@@ -76,7 +76,7 @@ one_genre_prop <- one_genre_prop[order(one_genre_prop$prop, decreasing = T),]
 one_genre_prop
 ```
 
-```{r}
+```{r,eval=F}
 all_movies_prop <- movies_join %>%
   group_by(genres) %>%
   summarize(
@@ -89,7 +89,7 @@ all_movies_prop
 ```
 
 One genre category is missing the IMAX category
-```{r}
+```{r,eval=F}
 prop_join <- full_join(one_genre_prop, all_movies_prop, by = "genres")
 prop_join <- rename(prop_join,
        count_one = count.x,
@@ -105,11 +105,12 @@ Doing a Chi-squared Goodness of fit test to see if proportions of one genre are 
 # chisq.test(prop_join$count_one, p = prop_join$prop_all)
 ```
 
-Chi-squared test does not work because the proportion of genres does not equal 1. We'll have to think of another way to see if these two stats are significantly different
+Chi-squared test does not work because the proportion of genres does not equal 1 in the population dataset. We'll have to think of another way to see if these two stats are significantly different.   
 
+Checking Dataset integrity and number of genres.
 ```{r}
-unique(movies_join$genres)
-sum(is.na(movies_join$genres))
+unique(movie_ratings_expanded$genres)
+sum(is.na(movie_ratings_expanded$genres))
 ```
 
 20 different genres
@@ -142,7 +143,7 @@ unique(movies_join$genres)
 
 Creating New Variables
 ```{r}
-movie_wide <- movies %>%
+dummy_movie_wide <- movies %>%
   mutate(
     Adventure = if_else(grepl("Adventure", movies$genres), 1, 0),
     Animation = if_else(grepl("Animation", movies$genres), 1, 0),
@@ -165,62 +166,69 @@ movie_wide <- movies %>%
     `Film-Noir` = if_else(grepl("Film-Noir", movies$genres), 1, 0),
     No_genre_listed = if_else(grepl("(no genres listed)", movies$genres), 1, 0)
   )
-str(movie_wide)
+str(dummy_movie_wide)
 ```
 
-```{r}
-sapply(movie_wide, mean)
+```{r,eval=F}
+#Code chunk for testing proportions
+sapply(dummy_movie_wide, mean)
 ```
 
 
 ```{r}
-rating_mean <- ratings %>%
+dummy_rating_mean <- ratings %>%
   group_by(movieId) %>%
   summarize(
     mean_rating = mean(rating)
   )
 
-movies_rating <- left_join(movie_wide, rating_mean, by = 'movieId')
-movies_rating
+movies_mean_rating <- left_join(dummy_movie_wide, dummy_rating_mean, by = 'movieId')
+movie_genre_expanded_mean <- left_join(dummy_movie_genre_expanded,dummy_rating_mean,by ='movieId')
+movies_mean_rating
+movie_genre_expanded_mean
 ```
 
 Expanding with Movie Ratings
 ```{r}
 library(data.table)
-movies_rating <- data.table(movies_rating)
-movies_rating_expanded <- movies_rating[ , list(genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+#movies_mean_rating <- data.table(movies_mean_rating)
+#movies_mean_rating_expanded <- movies_mean_rating[ , list(title,genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
 
 # remove spaces
-movies_rating_expanded$genres <- str_trim(movies_rating_expanded$genres)
+#movies_rating_expanded$genres <- str_trim(movies_rating_expanded$genres)
 
 # rejoining tables
-movies_rating <- select(movies_rating, -genres)
-movies_rating_expanded <- full_join(movies_rating_expanded, movies_rating, by = 'movieId')
-str(movies_rating_expanded)
+#movies_rating <- select(movies_rating, -genres)
+#movies_rating_expanded <- full_join(movies_rating_expanded, movies_rating, by = 'movieId')
+#str(movies_rating_expanded)
 ```
 
 Creating Year Variable
 ```{r}
-movies_rating_expanded$year <- str_sub(movies_rating_expanded$title, start = nchar(movies_rating_expanded$title)-4, end = nchar(movies_rating_expanded$title)-1) %>% str_trim()
-movies_rating_expanded$year <- as.factor(movies_rating_expanded$year)
+movie_ratings_expanded$year <- str_sub(movie_ratings_expanded$title, start = nchar(movie_ratings_expanded$title)-4, end = nchar(movie_ratings_expanded$title)-1) %>% str_trim()
+movie_ratings_expanded$year <- as.factor(movie_ratings_expanded$year)
 
-movie_wide$year <- str_sub(movie_wide$title, start = nchar(movie_wide$title)-4, end = nchar(movie_wide$title)-1) %>% str_trim()
-movie_wide$year <- as.factor(movie_wide$year)
+movies_mean_rating$year <- str_sub(movies_mean_rating$title, start = nchar(movies_mean_rating$title)-4, end = nchar(movies_mean_rating$title)-1) %>% str_trim()
+movies_mean_rating$year <- as.factor(movies_mean_rating$year)
 
-str(movie_wide)
+movie_genre_expanded_mean$year <- str_sub(movie_genre_expanded_mean$title, start = nchar(movie_genre_expanded_mean$title)-4, end = nchar(movie_genre_expanded_mean$title)-1) %>% str_trim()
+movie_genre_expanded_mean$year <- as.factor(movie_genre_expanded_mean$year)
+
+str(movie_genre_expanded_mean)
 ```
 
-## Data Visualization
+## Data Visualization   
 
+Since each movie can belong to multiple Genres, the rating given to that movie is counted towards all the Genres the movie is applicable too.   
 ```{r}
-rating_by_genre <- movies_rating_expanded %>%
+rating_by_genre <- movie_ratings_expanded %>%
   group_by(genres) %>%
   summarize(
     Count = n(),
-    Mean = mean(mean_rating, na.rm=T),
-    SD = sd(mean_rating, na.rm=T),
-    Min = min(mean_rating, na.rm=T),
-    Max = max(mean_rating, na.rm=T)
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
   )
 
 rating_by_genre <- rating_by_genre[order(rating_by_genre$Mean, decreasing = TRUE),]
@@ -247,14 +255,14 @@ rating_by_genre %>%
 
 Calculating Rating by Year
 ```{r}
-rating_by_year <- movies_rating_expanded %>%
+rating_by_year <- movie_ratings_expanded %>%
   group_by(year) %>%
   summarize(
     Count = n(),
-    Mean = mean(mean_rating, na.rm=T),
-    SD = sd(mean_rating, na.rm=T),
-    Min = min(mean_rating, na.rm=T),
-    Max = max(mean_rating, na.rm=T)
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
   )
 
 rating_by_year <- rating_by_year[order(rating_by_year$year),]
@@ -282,8 +290,8 @@ rating_by_year %>%
 ## Statistical Testing
 Testing Adventure
 ```{r}
-Adventure <- movies_rating %>% filter(Adventure == 1)
-Not_adventure <- movies_rating %>% filter(Adventure == 0)
+Adventure <- movies_mean_rating %>% filter(Adventure == 1)
+Not_adventure <- movies_mean_rating %>% filter(Adventure == 0)
 
 t.test(Adventure$mean_rating)
 t.test(Adventure$mean_rating, Not_adventure$mean_rating)

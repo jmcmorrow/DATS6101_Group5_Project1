@@ -20,6 +20,11 @@ ratings <- read_csv("ratings.csv")
 str(movies)
 str(ratings)
 ```
+Null Checks:
+```{r}
+max(is.na(movies))
+max(is.na(ratings))
+```
 
 ## Data Preprocessing
 
@@ -219,7 +224,7 @@ str(movie_genre_expanded_mean)
 
 ## Data Visualization   
 
-Since each movie can belong to multiple Genres, the rating given to that movie is counted towards all the Genres the movie is applicable too.   
+Since each movie can belong to multiple Genres, the rating given to that movie is counted towards all the Genres the movie is applicable to.   
 ```{r}
 rating_by_genre <- movie_ratings_expanded %>%
   group_by(genres) %>%
@@ -252,6 +257,7 @@ rating_by_genre %>%
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+However, the ratings given in each genre vary. Some genres can have a higher user contribution than others.   
 
 Calculating Rating by Year
 ```{r}
@@ -300,5 +306,59 @@ t.test(Adventure$mean_rating, Not_adventure$mean_rating)
 95% Confidence Interval for Adventure Movies: 3.16 - 3.25.
 
 Two-sample t-test has a p-value of 0.2, so we cannot reject null hypothesis that Adventure movies score higher than all other movies.
+
+### Identifying the movie with the highest mean rating from sample space and calculating it's confidence interval.   
+```{r}
+# First getting an additional column in wide data to get count of number of distinct users who've rated each movie
+dummy_rating_usercount <- ratings %>%
+  group_by(movieId) %>%
+  summarize(
+    distinct_user_ratings = n_distinct(userId)
+  )
+
+movies_mean_rating_new <- left_join(movies_mean_rating, dummy_rating_usercount, by = 'movieId')
+
+movies_mean_rating_new
+```
+We subset our wide data to ensure that we only include movies that have ~ 30 ratings provided across sample user population. This is to ensure we have enough data to calculate the confidence interval.        
+```{r}
+# This is to ensure we have enough data to calculate the confidence interval
+dummy_subset <- movies_mean_rating_new[movies_mean_rating_new$distinct_user_ratings>30,]
+dummy_subset
+dummy_subset[which.max(dummy_subset$mean_rating),]
+```
+As we can see from above, movieId = 1172 having title as = 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' has received the highest averaged rating across total of 37 Users. For the sake of analysis, this becomes our highest rated movie.    
+
+Now creating a subset that includes all user ratings for this movieId.
+```{r}
+movie_highestrated <- subset(movie_ratings_expanded,movieId==1172)
+movie_highestrated
+```
+Now retrieving the T-interval for this movie with a default confidence level of 0.95.
+```{r , results='markup'}
+ttest <- t.test(movie_highestrated$rating)
+ttest
+```
+Based on the above test, we can see that the average rating for the movie 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' lies in the interval [4.242887, 4.676032] for the entire User population with a confidence level of 95%.
+
+
+## Now calculating the movie with the maximum mixed reviews. (We consider the movie with the highest standard deviation, having a user count > 30)
+```{r}
+rating_by_movie <- movie_ratings_expanded %>%
+  group_by(movieId) %>%
+  summarize(
+    Count = n_distinct(userId),
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
+  )
+rating_by_movie <- subset(rating_by_movie,Count>30)
+
+rating_by_movie <- rating_by_movie[order(rating_by_movie$SD, decreasing = TRUE),]
+rating_by_movie
+```
+From this table, we see that the movie with maximum Standard Deviation, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled = `r movies[movies['movieId']==53996][2]`   
+
 
 

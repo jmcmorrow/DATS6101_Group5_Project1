@@ -164,7 +164,7 @@ dummy_movie_wide <- movies %>%
     Mystery = if_else(grepl("Mystery", movies$genres), 1, 0),
     `Sci-Fi` = if_else(grepl("Sci-Fi", movies$genres), 1, 0),
     IMAX = if_else(grepl("IMAX", movies$genres), 1, 0),
-    War = if_else(grepl("Adventure", movies$genres), 1, 0),
+    War = if_else(grepl("War", movies$genres), 1, 0),
     Musical = if_else(grepl("Musical", movies$genres), 1, 0),
     Documentary = if_else(grepl("Documentary", movies$genres), 1, 0),
     Western = if_else(grepl("Western", movies$genres), 1, 0),
@@ -229,7 +229,7 @@ Since each movie can belong to multiple Genres, the rating given to that movie i
 rating_by_genre <- movie_ratings_expanded %>%
   group_by(genres) %>%
   summarize(
-    Count = n(),
+    Count = n_distinct(userId),
     Mean = mean(rating, na.rm=T),
     SD = sd(rating, na.rm=T),
     Min = min(rating, na.rm=T),
@@ -264,7 +264,7 @@ Calculating Rating by Year
 rating_by_year <- movie_ratings_expanded %>%
   group_by(year) %>%
   summarize(
-    Count = n(),
+    Count = n_distinct(userId),
     Mean = mean(rating, na.rm=T),
     SD = sd(rating, na.rm=T),
     Min = min(rating, na.rm=T),
@@ -293,8 +293,9 @@ rating_by_year %>%
   theme(axis.text.x = element_text(angle = 90))
 ```
 
-## Statistical Testing
-Testing Adventure
+## Statistical Testing   
+
+**Testing Adventure**
 ```{r}
 Adventure <- movies_mean_rating %>% filter(Adventure == 1)
 Not_adventure <- movies_mean_rating %>% filter(Adventure == 0)
@@ -303,9 +304,241 @@ t.test(Adventure$mean_rating)
 t.test(Adventure$mean_rating, Not_adventure$mean_rating)
 ```
 
-95% Confidence Interval for Adventure Movies: 3.16 - 3.25.
+95% Confidence Interval for Adventure Movies: **3.16 - 3.25**.
 
-Two-sample t-test has a p-value of 0.2, so we cannot reject null hypothesis that Adventure movies score higher than all other movies.
+Two-sample t-test has a p-value of 0.2, so we cannot reject null hypothesis that Adventure movies have the same average rating as all other movies despite the sample average being higher.   
+
+
+**Testing Animation**
+```{r}
+Animation <- movies_mean_rating %>% filter(Animation == 1)
+Not_animation <- movies_mean_rating %>% filter(Animation == 0)
+
+t.test(Animation$mean_rating)
+t.test(Animation$mean_rating, Not_animation$mean_rating)
+```
+
+95% Confidence Interval for Animation Movies is **3.28 - 3.48**. 
+
+The Two Sample t-test has a p-value of **8.337e-09** which is highly statistically significant, so we reject null hypothesis that Animation movies have same averages as all other movies. Animation movies seem to score higher than the rest based on the sample provided.
+
+
+**Testing Children**
+```{r}
+Children <- movies_mean_rating %>% filter(Children == 1)
+Not_children <- movies_mean_rating %>% filter(Children == 0)
+
+t.test(Children$mean_rating)
+t.test(Children$mean_rating, Not_children$mean_rating)
+```
+
+95% Confidence Interval for Children Movies is **3.02 - 3.16**. 
+
+The Two Sample t-test has a p-value of **0.01** which is statistically significant on a 0.05 significance level, so we reject null hypothesis that Children movies have the same average rating as all other movies. Based on the sample set, we see that Children movies score lower than average of all other movies.
+
+
+**Testing Comedy**
+```{r}
+Comedy <- movies_mean_rating %>% filter(Comedy == 1)
+Not_comedy <- movies_mean_rating %>% filter(Comedy == 0)
+
+t.test(Comedy$mean_rating)
+t.test(Comedy$mean_rating, Not_comedy$mean_rating)
+```
+
+95% Confidence Interval for Comedy Movies is **3.07 - 3.12**. 
+
+The Two Sample t-test has a p-value of **3.164e-13** which is highly statistically significant on a 0.05 significance level, so we reject null hypothesis that Comedy movies have the same average rating than all other movies. Based on the sample, we see that comedy movies score less than average of all other movies.
+
+
+**Testing Fantasy**
+```{r}
+Fantasy <- movies_mean_rating %>% filter(Fantasy == 1)
+Not_fantasy <- movies_mean_rating %>% filter(Fantasy == 0)
+
+t.test(Fantasy$mean_rating)
+t.test(Fantasy$mean_rating, Not_fantasy$mean_rating)
+```
+
+95% Confidence Interval for Fantasy Movies is **3.18 - 3.24**. 
+
+The Two Sample t-test has a p-value of **0.9627** which is not statistically significant on a 0.05 significance level, so we cannot reject null hypothesis that Fantasy movies have the same average rating as all other movies. Based on the sample, we see that the average ratings are quite similar.
+
+
+**Testing Romance**
+```{r}
+Romance <- movies_mean_rating %>% filter(Romance == 1)
+Not_romance <- movies_mean_rating %>% filter(Romance == 0)
+
+t.test(Romance$mean_rating)
+t.test(Romance$mean_rating, Not_romance$mean_rating)
+```
+
+95% Confidence Interval for Romance Movies is **3.20 - 3.27**. 
+
+The Two Sample t-test has a p-value of **0.0013** which is statistically significant on a 0.05 significance level, so we can reject our null hypothesis that Romance movies have the same average rating as all other movies. Based on the sample data, we see that Romance movies score higher than average of all other movies.
+
+
+**Testing Drama**
+```{r}
+Drama <- movies_mean_rating %>% filter(Drama == 1)
+Not_drama <- movies_mean_rating %>% filter(Drama == 0)
+
+t.test(Drama$mean_rating)
+t.test(Drama$mean_rating, Not_drama$mean_rating)
+```
+
+95% Confidence Interval for Drama Movies is **3.26 - 3.31**. 
+
+The Two Sample t-test has a p-value of **2.2e-16** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Drama movies have the same average rating as all other movies. Based on the sample data, we see that Drama movies score higher than average of all other movies.
+
+
+**Testing Action**
+```{r}
+Action <- movies_mean_rating %>% filter(Action == 1)
+Not_action <- movies_mean_rating %>% filter(Action == 0)
+
+t.test(Action$mean_rating)
+t.test(Action$mean_rating, Not_action$mean_rating)
+```
+
+95% Confidence Interval for Action Movies is **3.08 - 3.15**. 
+
+The Two Sample t-test has a p-value of **0.0002** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Action movies have the same average rating as all other movies. Based on the sample, we see that Action movies score slightly lower than average of all other movies.
+
+
+**Testing Crime**
+```{r}
+Crime <- movies_mean_rating %>% filter(Crime == 1)
+Not_crime <- movies_mean_rating %>% filter(Crime == 0)
+
+t.test(Crime$mean_rating)
+t.test(Crime$mean_rating, Not_crime$mean_rating)
+```
+
+95% Confidence Interval for Crime Movies is **3.20 - 3.28**. 
+
+The Two Sample t-test has a p-value of **0.0014** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Crime movies have the same average rating as all other movies. Based on the sample data, we see that crime movies score higher than average of all other movies.
+
+
+**Testing Thriller**
+```{r}
+Thriller <- movies_mean_rating %>% filter(Thriller == 1)
+Not_thriller <- movies_mean_rating %>% filter(Thriller == 0)
+
+t.test(Thriller$mean_rating)
+t.test(Thriller$mean_rating, Not_thriller$mean_rating)
+```
+
+95% Confidence Interval for Thriller Movies is **3.10 - 3.16**. 
+
+The Two Sample t-test has a p-value of **0.0007** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Thriller movies have the same average rating as all other movies. Based on the sample dataset, we see that Thriller movies score slightly less than the average of all other movies.
+
+
+**Testing Horror**
+```{r}
+Horror <- movies_mean_rating %>% filter(Horror == 1)
+Not_horror <- movies_mean_rating %>% filter(Horror == 0)
+
+t.test(Horror$mean_rating)
+t.test(Horror$mean_rating, Not_horror$mean_rating)
+```
+
+95% Confidence Interval for Horror Movies is **2.77 - 2.89**. 
+
+The Two Sample t-test has a p-value of **2.2e-16** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Horror movies have the same average rating as all other movies. Based on the sample dataset, we see that horror movies score significantly less than average of all other movies.   
+
+
+**Testing War**
+```{r}
+War <- movies_mean_rating %>% filter(War == 1)
+Not_war <- movies_mean_rating %>% filter(War == 0)
+
+t.test(War$mean_rating)
+t.test(War$mean_rating, Not_war$mean_rating)
+```
+95% Confidence Interval for War Movies is **3.16 - 3.25**. 
+
+The Two Sample t-test has a p-value of **0.248** which is statistically not significant on a 0.05 significance level, so we cannot reject null hypothesis that War movies have the same average rating as all other movies. Based on the sample dataset, we see that War movies score higher than average of all other movies.   
+
+**Testing Musical**
+```{r}
+Musical <- movies_mean_rating %>% filter(Musical == 1)
+Not_musical <- movies_mean_rating %>% filter(Musical == 0)
+
+t.test(Musical$mean_rating)
+t.test(Musical$mean_rating, Not_musical$mean_rating)
+```
+95% Confidence Interval for Musical Movies is **3.15 - 3.30**. 
+
+The Two Sample t-test has a p-value of **0.1901** which is statistically not significant on a 0.05 significance level, so we cannot reject null hypothesis that Musical movies have the same average rating as all other movies. Based on the sample dataset, we see that Musical movies score higher than average of all other movies. 
+
+
+**Testing Documentary**
+```{r}
+Documentary <- movies_mean_rating %>% filter(Documentary == 1)
+Not_documentary <- movies_mean_rating %>% filter(Documentary == 0)
+
+t.test(Documentary$mean_rating)
+t.test(Documentary$mean_rating, Not_documentary$mean_rating)
+```
+95% Confidence Interval for Documentary Movies is **3.40 - 3.56**. 
+
+The Two Sample t-test has a p-value of **7.72e-14** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Documentary movies have the same average rating as all other movies. Based on the sample dataset, we see that Documentary movies score significantly higher than average of all other movies. 
+
+
+**Testing Western**
+```{r}
+Western <- movies_mean_rating %>% filter(Western == 1)
+Not_western <- movies_mean_rating %>% filter(Western == 0)
+
+t.test(Western$mean_rating)
+t.test(Western$mean_rating, Not_western$mean_rating)
+```
+95% Confidence Interval for Western Movies is **3.15 - 3.36**. 
+
+The Two Sample t-test has a p-value of **0.1299** which is statistically not significant on a 0.05 significance level, so we cannot reject null hypothesis that Documentary movies have the same average rating as all other movies. Based on the sample dataset, we see that Western movies score slightly higher than average of all other movies.
+
+
+**Testing Film-Noir**
+```{r}
+Film_Noir <- movies_mean_rating %>% filter(`Film-Noir` == 1)
+Not_film_noir <- movies_mean_rating %>% filter(`Film-Noir` == 0)
+
+t.test(Film_Noir$mean_rating)
+t.test(Film_Noir$mean_rating, Not_film_noir$mean_rating)
+```
+95% Confidence Interval for Film-Noir Movies is **3.31 - 3.51**. 
+
+The Two Sample t-test has a p-value of **3.833e-06** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Film-Noir movies have the same average rating as all other movies. Based on the sample dataset, we see that Film-Noir movies score significantly higher than average of all other movies.
+
+
+**Testing Sci-Fi**
+```{r}
+Sci_fi <- movies_mean_rating %>% filter(`Sci-Fi` == 1)
+Not_sci_fi <- movies_mean_rating %>% filter(`Sci-Fi` == 0)
+
+t.test(Sci_fi$mean_rating)
+t.test(Sci_fi$mean_rating, Not_sci_fi$mean_rating)
+```
+95% Confidence Interval for Sci-Fi Movies is **3.04 - 3.15**. 
+
+The Two Sample t-test has a p-value of **0.0027** which is statistically significant on a 0.05 significance level, so we can reject null hypothesis that Sci-Fi movies have the same average rating as all other movies. Based on the sample dataset, we see that Sci-Fi movies score higher than average of all other movies.
+
+
+**Testing Mystery**
+```{r}
+Mystery <- movies_mean_rating %>% filter(Mystery == 1)
+Not_mystery <- movies_mean_rating %>% filter(Mystery == 0)
+
+t.test(Mystery$mean_rating)
+t.test(Mystery$mean_rating, Not_mystery$mean_rating)
+```
+95% Confidence Interval for Mystery Movies is **3.15 - 3.27**. 
+
+The Two Sample t-test has a p-value of **0.3157** which is statistically not significant on a 0.05 significance level, so we cannot reject null hypothesis that Mystery movies have the same average rating as all other movies. Based on the sample dataset, we see that Mystery movies score higher than average of all other movies.
+
+
 
 ### Identifying the movie with the highest mean rating from sample space and calculating it's confidence interval.   
 ```{r}
@@ -329,7 +562,7 @@ dummy_subset[which.max(dummy_subset$mean_rating),]
 ```
 As we can see from above, movieId = 1172 having title as = 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' has received the highest averaged rating across total of 37 Users. For the sake of analysis, this becomes our highest rated movie.    
 
-Now creating a subset that includes all user ratings for this movieId.
+Now creating a subset that includes all sample user ratings for this movieId.
 ```{r}
 movie_highestrated <- subset(movie_ratings_expanded,movieId==1172)
 movie_highestrated
@@ -339,7 +572,28 @@ Now retrieving the T-interval for this movie with a default confidence level of 
 ttest <- t.test(movie_highestrated$rating)
 ttest
 ```
-Based on the above test, we can see that the average rating for the movie 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' lies in the interval [4.242887, 4.676032] for the entire User population with a confidence level of 95%.
+Based on the above test, we can see that the average rating for the movie 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' lies in the interval [4.242887, 4.676032] for the entire User population with a confidence level of 95% for the period between March 1996 and September 2018.
+
+
+### Identifying the Genre with the highest mean rating from sample space and calculating it's confidence interval.   
+
+```{r}
+# We already have a table that lists the mean ratings by Genre using the sample data and the number of Unique Users that have rated in that Genre
+rating_by_genre
+```
+Based on this table, we see that 1210 Users have rated the Genre: 'Film-Noir' with the highest average rating from the sample space. Therefore, will consider this Genre as the highest rated, and calculate it's confidence interval.   
+
+Now creating a subset that includes all sample user ratings for this Genre.   
+```{r}
+genre_highestrated <- subset(movie_ratings_expanded,genres=='Film-Noir')
+genre_highestrated
+```
+Now retrieving the T-interval for this Genre with a default confidence level of 0.95.
+```{r , results='markup'}
+ttest <- t.test(genre_highestrated$rating)
+ttest
+```
+Based on the above test, we can see that the average rating for the Genre: Film-Noir lies in the interval [3.863753, 3.963520] for the entire User population with a confidence level of 95% for the period between March 1996 and September 2018.
 
 
 ## Now calculating the movie with the maximum mixed reviews. (We consider the movie with the highest standard deviation, having a user count > 30)
@@ -358,7 +612,18 @@ rating_by_movie <- subset(rating_by_movie,Count>30)
 rating_by_movie <- rating_by_movie[order(rating_by_movie$SD, decreasing = TRUE),]
 rating_by_movie
 ```
-From this table, we see that the movie with maximum Standard Deviation, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled = `r movies[movies['movieId']==53996][2]`   
+From this table, we see that the movie with maximum Standard Deviation, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled = `r movies[movies['movieId']==53996][2]`  
+
+*Note: The SD decreases as n increases, so unsure if this is a fair deduction*
 
 
+## Now calculating the Genre with the maximum mixed reviews. (We consider the Genre with the highest standard deviation, having a user count > 30)
+```{r}
+rating_by_genre <- subset(rating_by_genre,Count>30)
 
+rating_by_genre <- rating_by_genre[order(rating_by_genre$SD, decreasing = TRUE),]
+rating_by_genre
+```
+From this table, we see that the genre with maximum Standard Deviation, and hence, maximum mixed reviews is Horror.  
+
+*Note: The SD decreases as n increases, so unsure if this is a fair deduction*

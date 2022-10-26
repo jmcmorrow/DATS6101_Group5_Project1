@@ -1,0 +1,408 @@
+---
+title: "Movie Ratings Group Project"
+author: "Group 5"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Importing Data
+```{r}
+rm(list=ls())
+library(tidyverse)
+
+movies <- read_csv("movies.csv")
+ratings <- read_csv("ratings.csv")
+
+str(movies)
+str(ratings)
+```
+
+## Data Preprocessing
+
+Expanding Movies Dataset
+
+```{r}
+library(data.table)
+movies <- data.table(movies)
+movies_expanded <- movies[ , list(genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+
+# remove spaces
+movies_expanded$genres <- str_trim(movies_expanded$genres)
+str(movies_expanded)
+```
+
+Checking Movies with only one genre listed
+```{r}
+movie_count_one <- movies_expanded %>%
+  group_by(movieId) %>%
+  summarize(
+    count = n()
+  ) %>%
+  filter(count == 1)
+movie_count_one
+```
+
+3,041 movies have only one genre listed (29.4%)
+*Might be able to perform a chi-squared goodness of fit test to see if there is any bias between movies with only one genre listed versus those with multiple genres*
+
+
+Joining Datasets
+```{r}
+movies_drop <- movies %>% select(-3)
+movies_join <- left_join(movies_expanded, movies_drop, by = "movieId")
+data <- full_join(movies_join, ratings, by = "movieId")
+```
+
+Subsetting Movies with one genre
+```{r}
+one_genre <- inner_join(movies_join, movie_count_one)
+one_genre
+```
+
+Finding proportion of genres
+```{r}
+one_genre_prop <- one_genre %>%
+  group_by(genres) %>%
+  summarize(
+    count = n(),
+    prop = n() / 3041
+  )
+
+one_genre_prop <- one_genre_prop[order(one_genre_prop$prop, decreasing = T),]
+one_genre_prop
+```
+
+```{r}
+all_movies_prop <- movies_join %>%
+  group_by(genres) %>%
+  summarize(
+    count = n(),
+    prop = n() / 10329
+  )
+
+all_movies_prop <- all_movies_prop[order(all_movies_prop$prop, decreasing = T),]
+all_movies_prop
+```
+
+One genre category is missing the IMAX category
+```{r}
+prop_join <- full_join(one_genre_prop, all_movies_prop, by = "genres")
+prop_join <- rename(prop_join,
+       count_one = count.x,
+       prop_one = prop.x,
+       count_all = count.y,
+       prop_all = prop.y)
+prop_join[is.na(prop_join)] = 0
+prop_join
+```
+
+Doing a Chi-squared Goodness of fit test to see if proportions of one genre are different from all of the genres
+```{r}
+# chisq.test(prop_join$count_one, p = prop_join$prop_all)
+```
+
+Chi-squared test does not work because the proportion of genres does not equal 1. We'll have to think of another way to see if these two stats are significantly different
+
+```{r}
+unique(movies_join$genres)
+sum(is.na(movies_join$genres))
+```
+
+20 different genres
+
+Some issues with the final dataset:
+* There are multiple genres per movie and multiple reviews per movie. This means the review ratings are duplicated in the final dataset in movies with multiple genres after they have been expanded. We might want to join the datasets with all genres listed in one column instead.
+* Overlap of genres between different movies might cause some issues.
+* The dataset is very long. We might want to subset it to those movies with just one genre (which would address the issue above), or perhaps narrow it down to a certain time frame.
+* The timestamp variable is being interpreted as numeric. We will need to figure out how to fix this.
+
+*Extract year from movie titles*
+
+Columns to make:
+* Average user ratings per movie
+* Number of ratings per movie
+* Year movie is made
+
+```{r, eval=F}
+genre_list <- list(unique(movies_join$genres))
+for (g in genre_list) {
+  movie_wide <- movies %>%
+    mutate(
+      g = if_else(grepl(g, movies$genres), 1, 0)
+    )
+}
+
+str(movie_wide)
+unique(movies_join$genres)
+```
+
+Creating New Variables
+```{r}
+movie_wide <- movies %>%
+  mutate(
+    Adventure = if_else(grepl("Adventure", movies$genres), 1, 0),
+    Animation = if_else(grepl("Animation", movies$genres), 1, 0),
+    Children = if_else(grepl("Children", movies$genres), 1, 0),
+    Comedy = if_else(grepl("Comedy", movies$genres), 1, 0),
+    Fantasy = if_else(grepl("Fantasy", movies$genres), 1, 0),
+    Romance = if_else(grepl("Romance", movies$genres), 1, 0),
+    Drama = if_else(grepl("Drama", movies$genres), 1, 0),
+    Action = if_else(grepl("Action", movies$genres), 1, 0),
+    Crime = if_else(grepl("Crime", movies$genres), 1, 0),
+    Thriller = if_else(grepl("Thriller", movies$genres), 1, 0),
+    Horror = if_else(grepl("Horror", movies$genres), 1, 0),
+    Mystery = if_else(grepl("Mystery", movies$genres), 1, 0),
+    `Sci-Fi` = if_else(grepl("Sci-Fi", movies$genres), 1, 0),
+    IMAX = if_else(grepl("IMAX", movies$genres), 1, 0),
+    War = if_else(grepl("Adventure", movies$genres), 1, 0),
+    Musical = if_else(grepl("Musical", movies$genres), 1, 0),
+    Documentary = if_else(grepl("Documentary", movies$genres), 1, 0),
+    Western = if_else(grepl("Western", movies$genres), 1, 0),
+    `Film-Noir` = if_else(grepl("Film-Noir", movies$genres), 1, 0),
+    No_genre_listed = if_else(grepl("(no genres listed)", movies$genres), 1, 0)
+  )
+str(movie_wide)
+```
+
+```{r}
+sapply(movie_wide, mean)
+```
+
+
+```{r}
+rating_mean <- ratings %>%
+  group_by(movieId) %>%
+  summarize(
+    mean_rating = mean(rating)
+  )
+
+movies_rating <- left_join(movie_wide, rating_mean, by = 'movieId')
+movies_rating
+```
+
+Expanding with Movie Ratings
+```{r}
+library(data.table)
+movies_rating <- data.table(movies_rating)
+movies_rating_expanded <- movies_rating[ , list(genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+
+# remove spaces
+movies_rating_expanded$genres <- str_trim(movies_rating_expanded$genres)
+
+# rejoining tables
+movies_rating <- select(movies_rating, -genres)
+movies_rating_expanded <- full_join(movies_rating_expanded, movies_rating, by = 'movieId')
+str(movies_rating_expanded)
+```
+
+Creating Year Variable
+```{r}
+movies_rating_expanded$year <- str_sub(movies_rating_expanded$title, start = nchar(movies_rating_expanded$title)-4, end = nchar(movies_rating_expanded$title)-1) %>% str_trim()
+movies_rating_expanded$year <- as.factor(movies_rating_expanded$year)
+
+movie_wide$year <- str_sub(movie_wide$title, start = nchar(movie_wide$title)-4, end = nchar(movie_wide$title)-1) %>% str_trim()
+movie_wide$year <- as.factor(movie_wide$year)
+
+str(movie_wide)
+```
+
+## Data Visualization
+
+```{r}
+rating_by_genre <- movies_rating_expanded %>%
+  group_by(genres) %>%
+  summarize(
+    Count = n(),
+    Mean = mean(mean_rating, na.rm=T),
+    SD = sd(mean_rating, na.rm=T),
+    Min = min(mean_rating, na.rm=T),
+    Max = max(mean_rating, na.rm=T)
+  )
+
+rating_by_genre <- rating_by_genre[order(rating_by_genre$Mean, decreasing = TRUE),]
+rating_by_genre
+```
+
+```{r}
+rating_by_genre %>%
+  ggplot(
+    aes(
+      x = fct_reorder(genres, Count, .desc = T),
+      y = Mean
+    )
+  ) +
+  geom_col(fill = "lightblue", color = "black") +
+  labs(
+    title = "User Movie Rating by Genre",
+    x = "Genre",
+    y = "Average User Rating (0-5)"
+  ) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Calculating Rating by Year
+```{r}
+rating_by_year <- movies_rating_expanded %>%
+  group_by(year) %>%
+  summarize(
+    Count = n(),
+    Mean = mean(mean_rating, na.rm=T),
+    SD = sd(mean_rating, na.rm=T),
+    Min = min(mean_rating, na.rm=T),
+    Max = max(mean_rating, na.rm=T)
+  )
+
+rating_by_year <- rating_by_year[order(rating_by_year$year),]
+rating_by_year
+```
+
+```{r}
+rating_by_year %>%
+  ggplot(
+    aes(
+      x = year,
+      y = Mean
+    )
+  ) + 
+  geom_col(fill = "lightblue") +
+   labs(
+    title = "User Movie Rating by Year",
+    x = "Year",
+    y = "Average User Rating (0-5)"
+  ) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Statistical Testing
+**Testing Adventure**
+```{r}
+Adventure <- movies_rating %>% filter(Adventure == 1)
+Not_adventure <- movies_rating %>% filter(Adventure == 0)
+
+t.test(Adventure$mean_rating)
+t.test(Adventure$mean_rating, Not_adventure$mean_rating)
+```
+
+95% Confidence Interval for Adventure Movies: 3.16 - 3.25.
+
+Two-sample t-test has a p-value of 0.2, so we cannot reject null hypothesis that Adventure movies score higher than all other movies.
+
+
+**Testing Animation**
+```{r}
+Animation <- movies_rating %>% filter(Animation == 1)
+Not_animation <- movies_rating %>% filter(Animation == 0)
+
+t.test(Animation$mean_rating)
+t.test(Animation$mean_rating, Not_animation$mean_rating)
+```
+
+95% Confidence Interval for Animation Movies is **3.33 - 3.48**. The Welch Two Sample t-test has a p-value of **8.337e-09** which is highly statistically significant, so we cannot reject null hypothesis that Animation movies score higher than all other movies.
+
+**Testing Children**
+```{r}
+Children <- movies_rating %>% filter(Children == 1)
+Not_children <- movies_rating %>% filter(Children == 0)
+
+t.test(Children$mean_rating)
+t.test(Children$mean_rating, Not_children$mean_rating)
+```
+
+95% Confidence Interval for Children Movies is **3.02 - 3.15**. The Welch Two Sample t-test has a p-value of **0.01** which is statistically significant on a 0.05 significance level, so we cannot reject null hypothesis that Children movies score higher than all other movies.
+
+**Testing Comedy**
+```{r}
+Comedy <- movies_rating %>% filter(Comedy == 1)
+Not_comedy <- movies_rating %>% filter(Comedy == 0)
+
+t.test(Comedy$mean_rating)
+t.test(Comedy$mean_rating, Not_comedy$mean_rating)
+```
+
+95% Confidence Interval for Comedy Movies is **3.06 - 3.12**. The Welch Two Sample t-test has a p-value of **3.164e-13** which is highly statistically significant on a 0.05 significance level, so we cannot reject null hypothesis that Comedy movies score higher than all other movies.
+
+**Testing Fantasy**
+```{r}
+Fantasy <- movies_rating %>% filter(Fantasy == 1)
+Not_fantasy <- movies_rating %>% filter(Fantasy == 0)
+
+t.test(Fantasy$mean_rating)
+t.test(Fantasy$mean_rating, Fantasy$mean_rating)
+```
+
+95% Confidence Interval for Fantasy Movies is **3.12 - 3.24**. The Welch Two Sample t-test has a p-value of **1.00** which is not statistically significant on a 0.05 significance level, so we **can reject** null hypothesis that Fantasy movies score higher than all other movies.
+
+**Testing Romance**
+```{r}
+Romance <- movies_rating %>% filter(Romance == 1)
+Not_romance <- movies_rating %>% filter(Romance == 0)
+
+t.test(Romance$mean_rating)
+t.test(Romance$mean_rating, Romance$mean_rating)
+```
+
+95% Confidence Interval for Romance Movies is **3.19 - 3.27**. The Welch Two Sample t-test has a p-value of **1.00** which is not statistically significant on a 0.05 significance level, so we **can reject** null hypothesis that Romance movies score higher than all other movies.
+
+
+**Testing Drama**
+```{r}
+Drama <- movies_rating %>% filter(Drama == 1)
+Not_drama <- movies_rating %>% filter(Drama == 0)
+
+t.test(Drama$mean_rating)
+t.test(Drama$mean_rating, Drama$mean_rating)
+```
+
+95% Confidence Interval for Drama Movies is **3.26 - 3.30**. The Welch Two Sample t-test has a p-value of **1.00** which is not statistically significant on a 0.05 significance level, so we **can reject** null hypothesis that Drama movies score higher than all other movies.
+
+
+**Testing Action**
+```{r}
+Action <- movies_rating %>% filter(Action == 1)
+Not_action <- movies_rating %>% filter(Action == 0)
+
+t.test(Action$mean_rating)
+t.test(Action$mean_rating, Action$mean_rating)
+```
+
+95% Confidence Interval for Action Movies is **3.08 - 3.15**. The Welch Two Sample t-test has a p-value of **1.00** which is not statistically significant on a 0.05 significance level, so we **can reject** null hypothesis that Action movies score higher than all other movies.
+
+**Testing Crime**
+```{r}
+Crime <- movies_rating %>% filter(Crime == 1)
+Not_crime <- movies_rating %>% filter(Crime == 0)
+
+t.test(Crime$mean_rating)
+t.test(Crime$mean_rating, Crime$mean_rating)
+```
+
+95% Confidence Interval for Crime Movies is **3.20 - 3.28**. The Welch Two Sample t-test has a p-value of **1.00** which is not statistically significant on a 0.05 significance level, so we **can reject** null hypothesis that Crime movies score higher than all other movies.
+
+
+**Testing Thriller**
+```{r}
+Thriller <- movies_rating %>% filter(Thriller == 1)
+Not_thriller <- movies_rating %>% filter(Thriller == 0)
+
+t.test(Thriller$mean_rating)
+t.test(Thriller$mean_rating, Thriller$mean_rating)
+```
+
+95% Confidence Interval for Thriller Movies is **3.10 - 3.16**. The Welch Two Sample t-test has a p-value of **1.00** which is not statistically significant on a 0.05 significance level, so we **can reject** null hypothesis that Thriller movies score higher than all other movies.
+
+**Testing Horror**
+```{r}
+Horror <- movies_rating %>% filter(Horror == 1)
+Not_horror <- movies_rating %>% filter(Horror == 0)
+
+t.test(Horror$mean_rating)
+t.test(Horror$mean_rating, Horror$mean_rating)
+```
+
+95% Confidence Interval for Horror Movies is **2.77 - 2.89**. The Welch Two Sample t-test has a p-value of **1.00** which is not statistically significant on a 0.05 significance level, so we **can reject** null hypothesis that Horror movies score higher than all other movies.

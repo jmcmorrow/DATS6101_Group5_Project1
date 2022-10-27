@@ -360,7 +360,7 @@ t.test(Fantasy$mean_rating)
 t.test(Fantasy$mean_rating, Not_fantasy$mean_rating)
 ```
 
-95% Confidence Interval for Fantasy Movies is **3.18 - 3.24**. 
+95% Confidence Interval for Fantasy Movies is **3.12 - 3.24**. 
 
 The Two Sample t-test has a p-value of **0.9627** which is not statistically significant on a 0.05 significance level, so we cannot reject null hypothesis that Fantasy movies have the same average rating as all other movies. Based on the sample, we see that the average ratings are quite similar.
 
@@ -457,7 +457,7 @@ Not_war <- movies_mean_rating %>% filter(War == 0)
 t.test(War$mean_rating)
 t.test(War$mean_rating, Not_war$mean_rating)
 ```
-95% Confidence Interval for War Movies is **3.16 - 3.25**. 
+95% Confidence Interval for War Movies is **3.33 - 3.46**. 
 
 The Two Sample t-test has a p-value of **0.248** which is statistically not significant on a 0.05 significance level, so we cannot reject null hypothesis that War movies have the same average rating as all other movies. Based on the sample dataset, we see that War movies score higher than average of all other movies.   
 
@@ -627,3 +627,37 @@ rating_by_genre
 From this table, we see that the genre with maximum Standard Deviation, and hence, maximum mixed reviews is Horror.  
 
 *Note: The SD decreases as n increases, so unsure if this is a fair deduction*
+
+
+# Confidence Interval Visualization
+```{r}
+conf_interval <- data.frame(genre = c("Adventure", "Animation", "Children", "Comedy", "Fantasy", "Romance", "Drama", "Action", "Crime", "Thriller", "Horror", "War", "Musical", "Documentary", "Western", "Film-Noir", "Sci-Fi", "Mystery"),
+                            mean = c(3.20, 3.41, 3.09, 3.09, 3.18, 3.23, 3.28, 3.11, 3.24, 3.13, 2.83, 3.39, 3.23, 3.48, 3.25, 3.41, 3.10, 3.21),
+                            lower = c(3.16, 3.28, 3.02, 3.07, 3.12, 3.20, 3.26, 3.08, 3.20, 3.10, 2.77, 3.33, 3.15, 3.40, 3.15, 3.31, 3.04, 3.15),
+                            upper = c(3.25, 3.48, 3.16, 3.12, 3.24, 3.27, 3.31, 3.15, 3.28, 3.16, 2.89, 3.46, 3.30, 3.56, 3.36, 3.51, 3.15, 3.27))
+
+conf_interval
+```
+
+```{r}
+conf_interval <- as.tibble(conf_interval[order(conf_interval$mean, decreasing = TRUE),])
+
+conf_interval %>%
+  ggplot(
+    aes(
+      x = mean,
+      y = fct_reorder(genre, desc(mean))
+    )
+  ) + 
+  geom_point() + 
+  geom_errorbar(aes(xmin = lower, xmax = upper)) +
+  labs(
+    title = "Confidence Intervals for Ratings by Genre",
+    x = "Mean Rating",
+    y = "Genre"
+  ) +
+  theme_bw()
+```
+
+*Documentary hsa the higher confidence interval, with overlaps with War, Film-Noir, and Animation. One of these four is most likely the highest rating genre. Horror is the lowest rating genre by far, with no overlap with any other genres.*
+

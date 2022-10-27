@@ -130,7 +130,7 @@ Some issues with the final dataset:
 
 Columns to make:
 * Average user ratings per movie
-* Number of ratings per movie
+* Number of User ratings per movie
 * Year movie is made
 
 ```{r, eval=F}
@@ -146,7 +146,7 @@ str(movie_wide)
 unique(movies_join$genres)
 ```
 
-Creating New Variables
+Creating New Variables - To perform 2 sample t-tests for comparing each Genre, with the rest of the Genre.
 ```{r}
 dummy_movie_wide <- movies %>%
   mutate(
@@ -539,8 +539,67 @@ t.test(Mystery$mean_rating, Not_mystery$mean_rating)
 The Two Sample t-test has a p-value of **0.3157** which is statistically not significant on a 0.05 significance level, so we cannot reject null hypothesis that Mystery movies have the same average rating as all other movies. Based on the sample dataset, we see that Mystery movies score higher than average of all other movies.
 
 
+# Confidence Interval Visualization
+```{r}
+conf_interval <- data.frame(genre = c("Adventure", "Animation", "Children", "Comedy", "Fantasy", "Romance", "Drama", "Action", "Crime", "Thriller", "Horror", "War", "Musical", "Documentary", "Western", "Film-Noir", "Sci-Fi", "Mystery"),
+                            mean = c(3.20, 3.41, 3.09, 3.09, 3.18, 3.23, 3.28, 3.11, 3.24, 3.13, 2.83, 3.39, 3.23, 3.48, 3.25, 3.41, 3.10, 3.21),
+                            lower = c(3.16, 3.28, 3.02, 3.07, 3.12, 3.20, 3.26, 3.08, 3.20, 3.10, 2.77, 3.33, 3.15, 3.40, 3.15, 3.31, 3.04, 3.15),
+                            upper = c(3.25, 3.48, 3.16, 3.12, 3.24, 3.27, 3.31, 3.15, 3.28, 3.16, 2.89, 3.46, 3.30, 3.56, 3.36, 3.51, 3.15, 3.27))
+
+conf_interval
+```
+
+```{r}
+conf_interval <- as.tibble(conf_interval[order(conf_interval$mean, decreasing = TRUE),])
+
+conf_interval %>%
+  ggplot(
+    aes(
+      x = mean,
+      y = fct_reorder(genre, desc(mean))
+    )
+  ) + 
+  geom_point() + 
+  geom_errorbar(aes(xmin = lower, xmax = upper)) +
+  labs(
+    title = "Confidence Intervals for Ratings by Genre",
+    x = "Mean Rating",
+    y = "Genre"
+  ) +
+  theme_bw()
+```
+
+*Documentary has the higher confidence interval, which overlaps with War, Film-Noir, and Animation. One of these four is most likely the highest rating genre out of all the movies in each genre. Horror is the lowest rating genre by far, with no overlap with any other genres.*   
+
+*Note: In the previous analysis, we performed 1-sample T-test to get the interval of averaged User ratings, by using sample data, for each genre across the movie population with 95% confidence. Additionally, we've calculated the 2-sample T-test for each genre and corresponding non-genre, to gauge how a specific genre compares to the average of all other genres across the movie population.*
+
+
+### Identifying the Genre with the highest mean rating from sample space and calculating it's confidence interval.   
+
+*To get a more clear picture about the best performing Genre across the User population instead, we work with the Raw data. We take the approach of identifying the Genre with the highest mean rating from the sample User dataset, which at least has > 30 Users rating it for CLT to be applicable. After identifying this Genre, we go ahead and make the confidence intervals to answer our question.*    
+```{r}
+# We already have a table that lists the mean ratings by Genre using the sample data and the number of Unique Users that have rated in that Genre
+rating_by_genre
+```
+Based on this table, we see that 1210 Users have rated the Genre: 'Film-Noir' with the highest average rating from the sample space. Therefore, will consider this Genre as the highest rated, and calculate it's confidence interval.   
+
+Now creating a subset that includes all sample user ratings for this Genre.   
+```{r}
+genre_highestrated <- subset(movie_ratings_expanded,genres=='Film-Noir')
+genre_highestrated
+```
+Now retrieving the T-interval for this Genre with a default confidence level of 0.95.
+```{r , results='markup'}
+ttest <- t.test(genre_highestrated$rating)
+ttest
+```
+Based on the above test, we can see that the average rating for the Genre: Film-Noir lies in the interval [3.863753, 3.963520] for the entire User population with a confidence level of 95% for the period between March 1996 and September 2018.
+
+
 
 ### Identifying the movie with the highest mean rating from sample space and calculating it's confidence interval.   
+
+*Note: To identify the average ratings for all movies in the User population, we'd have to make confidence intervals of all 10,000+ movies. Instead, we take a similar approach as above of identifying the movie with the highest mean rating from the sample User dataset, which at least has > 30 Users rating it for CLT to be applicable. After identifying this movie, we go ahead and make the confidence intervals to answer our question.* 
 ```{r}
 # First getting an additional column in wide data to get count of number of distinct users who've rated each movie
 dummy_rating_usercount <- ratings %>%
@@ -575,27 +634,6 @@ ttest
 Based on the above test, we can see that the average rating for the movie 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' lies in the interval [4.242887, 4.676032] for the entire User population with a confidence level of 95% for the period between March 1996 and September 2018.
 
 
-### Identifying the Genre with the highest mean rating from sample space and calculating it's confidence interval.   
-
-```{r}
-# We already have a table that lists the mean ratings by Genre using the sample data and the number of Unique Users that have rated in that Genre
-rating_by_genre
-```
-Based on this table, we see that 1210 Users have rated the Genre: 'Film-Noir' with the highest average rating from the sample space. Therefore, will consider this Genre as the highest rated, and calculate it's confidence interval.   
-
-Now creating a subset that includes all sample user ratings for this Genre.   
-```{r}
-genre_highestrated <- subset(movie_ratings_expanded,genres=='Film-Noir')
-genre_highestrated
-```
-Now retrieving the T-interval for this Genre with a default confidence level of 0.95.
-```{r , results='markup'}
-ttest <- t.test(genre_highestrated$rating)
-ttest
-```
-Based on the above test, we can see that the average rating for the Genre: Film-Noir lies in the interval [3.863753, 3.963520] for the entire User population with a confidence level of 95% for the period between March 1996 and September 2018.
-
-
 ## Now calculating the movie with the maximum mixed reviews. (We consider the movie with the highest standard deviation, having a user count > 30)
 ```{r}
 rating_by_movie <- movie_ratings_expanded %>%
@@ -614,7 +652,9 @@ rating_by_movie
 ```
 From this table, we see that the movie with maximum Standard Deviation, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled = `r movies[movies['movieId']==53996][2]`  
 
-*Note: The SD decreases as n increases, so unsure if this is a fair deduction*
+*Note: The SD decreases as n increases, so unsure if this is a fair deduction. This is in accordance with the law of large numbers which is an application of CLT. It states that as n increases, the sample proportion or mean shifts closer to the population mean as there is a decrease in the standard deviation.*   
+
+*To do a fair analysis, we would need a constant number of users rating all the movies to find the movie with the maximum standard deviation.*
 
 
 ## Now calculating the Genre with the maximum mixed reviews. (We consider the Genre with the highest standard deviation, having a user count > 30)
@@ -626,38 +666,10 @@ rating_by_genre
 ```
 From this table, we see that the genre with maximum Standard Deviation, and hence, maximum mixed reviews is Horror.  
 
-*Note: The SD decreases as n increases, so unsure if this is a fair deduction*
+*Note: The SD decreases as n increases, so unsure if this is a fair deduction. This is also in accordance with the law of large numbers which is an application of CLT. It states that as n increases, the sample proportion or mean shifts closer to the population mean as there is a decrease in the standard deviation.*   
+
+*To do a fair analysis, we would need a constant number of users rating all the genres to find the genre with the maximum standard deviation.**
 
 
-# Confidence Interval Visualization
-```{r}
-conf_interval <- data.frame(genre = c("Adventure", "Animation", "Children", "Comedy", "Fantasy", "Romance", "Drama", "Action", "Crime", "Thriller", "Horror", "War", "Musical", "Documentary", "Western", "Film-Noir", "Sci-Fi", "Mystery"),
-                            mean = c(3.20, 3.41, 3.09, 3.09, 3.18, 3.23, 3.28, 3.11, 3.24, 3.13, 2.83, 3.39, 3.23, 3.48, 3.25, 3.41, 3.10, 3.21),
-                            lower = c(3.16, 3.28, 3.02, 3.07, 3.12, 3.20, 3.26, 3.08, 3.20, 3.10, 2.77, 3.33, 3.15, 3.40, 3.15, 3.31, 3.04, 3.15),
-                            upper = c(3.25, 3.48, 3.16, 3.12, 3.24, 3.27, 3.31, 3.15, 3.28, 3.16, 2.89, 3.46, 3.30, 3.56, 3.36, 3.51, 3.15, 3.27))
 
-conf_interval
-```
-
-```{r}
-conf_interval <- as.tibble(conf_interval[order(conf_interval$mean, decreasing = TRUE),])
-
-conf_interval %>%
-  ggplot(
-    aes(
-      x = mean,
-      y = fct_reorder(genre, desc(mean))
-    )
-  ) + 
-  geom_point() + 
-  geom_errorbar(aes(xmin = lower, xmax = upper)) +
-  labs(
-    title = "Confidence Intervals for Ratings by Genre",
-    x = "Mean Rating",
-    y = "Genre"
-  ) +
-  theme_bw()
-```
-
-*Documentary hsa the higher confidence interval, with overlaps with War, Film-Noir, and Animation. One of these four is most likely the highest rating genre. Horror is the lowest rating genre by far, with no overlap with any other genres.*
 

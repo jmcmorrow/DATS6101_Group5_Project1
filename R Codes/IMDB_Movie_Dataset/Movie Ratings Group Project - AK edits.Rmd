@@ -244,6 +244,25 @@ rating_by_genre
 rating_by_genre %>%
   ggplot(
     aes(
+      x = fct_reorder(genres, desc(Count)),
+      y = Count
+    )
+  ) +
+  geom_col(fill = "lightblue", color = "black") +
+  labs(
+    title = "Number of Distinct User Ratings by Genre",
+    x = "Genre",
+    y = "Number of Users"
+  ) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+rating_by_genre %>%
+  ggplot(
+    aes(
       x = fct_reorder(genres, Count, .desc = T),
       y = Mean
     )

@@ -6,9 +6,32 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F,results='markup')
 ```
 
+### Initial dataset manipulation
+Movie Ratings Dataset Join test
+```{r}
+getwd()
+
+movies <- data.frame(read.csv("movies.csv"))
+ratings <- data.frame(read.csv("ratings.csv"))
+movie_ratings <- merge(x = movies, y = ratings, by = 'movieId', all.y = TRUE)
+
+# Null checks
+max(is.na(movie_ratings))
+
+# Splitting the Genres into unique rows
+# install.packages('magrittr') - for pipe operator
+# install.packages('tidyverse') - to create unique rows
+library(magrittr)
+library(tidyverse)
+movie_ratings <- movie_ratings %>% separate_rows(genres)
+movies <- movies %>% separate_rows(genres)
+unique(movies$genres)
+```
+
+    
 Importing Data
 ```{r}
 rm(list=ls())
@@ -120,17 +143,18 @@ sum(is.na(movie_ratings_expanded$genres))
 
 20 different genres
 
-Some issues with the final dataset:
-* There are multiple genres per movie and multiple reviews per movie. This means the review ratings are duplicated in the final dataset in movies with multiple genres after they have been expanded. We might want to join the datasets with all genres listed in one column instead.
-* Overlap of genres between different movies might cause some issues.
-* The dataset is very long. We might want to subset it to those movies with just one genre (which would address the issue above), or perhaps narrow it down to a certain time frame.
+Some issues with the final dataset:   
+
+* There are multiple genres per movie and multiple reviews per movie. This means the review ratings are duplicated in the final dataset in movies with multiple genres after they have been expanded. We might want to join the datasets with all genres listed in one column instead.   
+* Overlap of genres between different movies might cause some issues.   
+* The dataset is very long. We might want to subset it to those movies with just one genre (which would address the issue above), or perhaps narrow it down to a certain time frame.   
 * The timestamp variable is being interpreted as numeric. We will need to figure out how to fix this.
 
 *Extract year from movie titles*
 
-Columns to make:
-* Average user ratings per movie
-* Number of User ratings per movie
+Columns to make:   
+* Average user ratings per movie   
+* Number of User ratings per movie   
 * Year movie is made
 
 ```{r, eval=F}
@@ -187,7 +211,7 @@ dummy_rating_mean <- ratings %>%
     mean_rating = mean(rating)
   )
 
-movies_mean_rating <- left_join(dummy_movie_wide, dummy_rating_mean, by = 'movieId')
+movies_mean_rating <- left_join(dummy_movie_wide,dummy_rating_mean, by = 'movieId')
 movie_genre_expanded_mean <- left_join(dummy_movie_genre_expanded,dummy_rating_mean,by ='movieId')
 movies_mean_rating
 movie_genre_expanded_mean
@@ -608,7 +632,7 @@ dummy_rating_usercount <- ratings %>%
     distinct_user_ratings = n_distinct(userId)
   )
 
-movies_mean_rating_new <- left_join(movies_mean_rating, dummy_rating_usercount, by = 'movieId')
+movies_mean_rating_new <- left_join(movies_mean_rating,dummy_rating_usercount, by = 'movieId')
 
 movies_mean_rating_new
 ```
@@ -650,7 +674,7 @@ rating_by_movie <- subset(rating_by_movie,Count>30)
 rating_by_movie <- rating_by_movie[order(rating_by_movie$SD, decreasing = TRUE),]
 rating_by_movie
 ```
-From this table, we see that the movie with maximum Standard Deviation, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled = `r movies[movies['movieId']==53996][2]`  
+From this table, we see that the movie with maximum Standard Deviation, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled = Transformers (2007)  
 
 *Note: The SD decreases as n increases, so unsure if this is a fair deduction. This is in accordance with the law of large numbers which is an application of CLT. It states that as n increases, the sample proportion or mean shifts closer to the population mean as there is a decrease in the standard deviation.*   
 

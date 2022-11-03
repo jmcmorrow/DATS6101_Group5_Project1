@@ -370,7 +370,7 @@ xkabledplyhead(rating_by_genre,title="Top 5 Genres with mixed reviews")
 ```   
 From this table, we see that the genre with maximum Standard Deviation, and hence, maximum mixed reviews is Horror.  
 
-*Note: We only selected movies that had more than thirty ratings. We soon realized that this data followed the law of large numbers (See Citation), which is that standard deviation tends to decrease as the sample size increases. This lead to an unreliable result for our answers to these questions.   *
+*Note: We only selected movies that had more than thirty ratings. We soon realized that this data followed the law of large numbers (Libretexts, 2022), which is that standard deviation tends to decrease as the sample size increases. This lead to an unreliable result for our answers to these questions.   *
 *To do a fair analysis, we would need a constant number of users rating all the movies to find the movie and genre with the maximum standard deviation.*   
 
 # Conclusions   
@@ -389,3 +389,6 @@ A few important conclusions from performing EDA and inferential statistics on th
 
 # References   
 
+1. Libretexts. (2022, April 24). 6.3: The law of large numbers. Statistics LibreTexts. Retrieved November 3, 2022, from https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/06%3A_Random_Samples/6.03%3A_The_Law_of_Large_Numbers 
+
+2. Movielens. GroupLens. (2021, December 8). Retrieved November 3, 2022, from https://grouplens.org/datasets/movielens/ 

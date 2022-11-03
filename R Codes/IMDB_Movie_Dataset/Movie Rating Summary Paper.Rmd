@@ -1,15 +1,11 @@
 ---
-title: "Movie Rating Summary Paper"
-author: "Group 5"
+title: "I Watch Therefore I Am: Exploratory Data Analysis of Movie Ratings"
+author: "Jack McMorrow, Aditya Kumar, Anthony C. Okoye"
 date: "2022-11-03"
-output: html_document
 output:
   html_document:
     code_folding: hide
     number_sections: false
-    toc: yes
-    toc_depth: 3
-    toc_float: yes
   pdf_document:
     toc: yes
     toc_depth: '3'
@@ -106,6 +102,6 @@ conf_interval <- data.frame(genre = c("Adventure", "Animation", "Children", "Com
 ```
 
 
-  For a long time, we’ve liked to engross ourselves in fables and stories for ranging purposes. Cinema has become the modern medium to achieve this. From documentaries to action thrillers, it has become an integral part of any community; movies mirror what we believe and help redefine the narrative on how we see others in the world. Whether they’re utilized as a medium to relax after work or school, address key issues to drive social change, or therapeutically to tackle mental health, movies drive and shape our societies.
+|       For a long time, we’ve liked to engross ourselves in fables and stories for ranging purposes. Cinema has become the modern medium to achieve this. From documentaries to action thrillers, it has become an integral part of any community; movies mirror what we believe and help redefine the narrative on how we see others in the world. Whether they’re utilized as a medium to relax after work or school, address key issues to drive social change, or therapeutically to tackle mental health, movies drive and shape our societies.
 
-  GroupLens is a research lab in the Dept. of Computer Science of University of Minnesota, which among other things, specializes in a movie recommendation system through MovieLens, that utilizes user ratings to recommend movies to its users. Using two datasets, one with 10,329 movies and their genres, and another with 105,339 IMDB ratings (scale of 5) across 668 Users (selected randomly) between March 1996 and September 2018, we can perform exciting exploratory analysis of movie ratings, genres, and user preference. We have compiled both datasets into a single dataset and also split the genres variable into multiple unique rows to be able to utilize them. This has increased the observations of the final dataset to 299,937.
+|       GroupLens is a research lab in the Dept. of Computer Science of University of Minnesota, which among other things, specializes in a movie recommendation system through MovieLens, that utilizes user ratings to recommend movies to its users. Using two datasets, one with 10,329 movies and their genres, and another with 105,339 IMDB ratings (scale of 5) across 668 Users (selected randomly) between March 1996 and September 2018, we can perform exciting exploratory analysis of movie ratings, genres, and user preference. We have compiled both datasets into a single dataset and also split the genres variable into multiple unique rows to be able to utilize them. This has increased the observations of the final dataset to 299,937.

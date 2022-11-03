@@ -1,0 +1,414 @@
+---
+title: "I Watch Therefore I Am: Exploratory Data Analysis of Movie Ratings"
+author: "Jack McMorrow, Aditya Kumar, Anthony C. Okoye"
+date: "2022-11-03"
+output:
+  rmdformats::readthedown:
+      toc_float: true
+      toc_depth: 3
+      number_sections: true
+      code_folding: hide
+      includes:
+        before_body: header.tmphtml
+---
+
+```{r init, include=FALSE}
+knitr::opts_chunk$set(warning = F, results = "hide", message = F, echo = F)
+options(scientific=T, digits = 3) 
+```
+
+```{r importing data and preprocessing, include=FALSE}
+rm(list=ls())
+library(tidyverse)
+library(ezids)
+library(dplyr)
+
+movies <- read_csv("movies.csv")
+ratings <- read_csv("ratings.csv")
+
+library(data.table)
+movies <- data.table(movies)
+dummy_movie_genre_expanded <- movies[, list(title,genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+
+# remove spaces
+dummy_movie_genre_expanded$genres <- str_trim(dummy_movie_genre_expanded$genres)
+str(dummy_movie_genre_expanded)
+
+# joining datasets
+movie_ratings_expanded <- full_join(dummy_movie_genre_expanded, ratings, by = "movieId")
+
+# Creating New Variables - To perform 2 sample t-tests for comparing each Genre, with the rest of the Genre.
+dummy_movie_wide <- movies %>%
+  mutate(
+    Adventure = if_else(grepl("Adventure", movies$genres), 1, 0),
+    Animation = if_else(grepl("Animation", movies$genres), 1, 0),
+    Children = if_else(grepl("Children", movies$genres), 1, 0),
+    Comedy = if_else(grepl("Comedy", movies$genres), 1, 0),
+    Fantasy = if_else(grepl("Fantasy", movies$genres), 1, 0),
+    Romance = if_else(grepl("Romance", movies$genres), 1, 0),
+    Drama = if_else(grepl("Drama", movies$genres), 1, 0),
+    Action = if_else(grepl("Action", movies$genres), 1, 0),
+    Crime = if_else(grepl("Crime", movies$genres), 1, 0),
+    Thriller = if_else(grepl("Thriller", movies$genres), 1, 0),
+    Horror = if_else(grepl("Horror", movies$genres), 1, 0),
+    Mystery = if_else(grepl("Mystery", movies$genres), 1, 0),
+    `Sci-Fi` = if_else(grepl("Sci-Fi", movies$genres), 1, 0),
+    IMAX = if_else(grepl("IMAX", movies$genres), 1, 0),
+    War = if_else(grepl("War", movies$genres), 1, 0),
+    Musical = if_else(grepl("Musical", movies$genres), 1, 0),
+    Documentary = if_else(grepl("Documentary", movies$genres), 1, 0),
+    Western = if_else(grepl("Western", movies$genres), 1, 0),
+    `Film-Noir` = if_else(grepl("Film-Noir", movies$genres), 1, 0),
+    No_genre_listed = if_else(grepl("(no genres listed)", movies$genres), 1, 0)
+  )
+
+# Adding year
+movie_ratings_expanded$year <- str_sub(movie_ratings_expanded$title, start = nchar(movie_ratings_expanded$title)-4, end = nchar(movie_ratings_expanded$title)-1) %>% str_trim()
+movie_ratings_expanded$year <- as.factor(movie_ratings_expanded$year)
+
+# Calulating movie by genre - Used later for graph
+rating_by_genre <- movie_ratings_expanded %>%
+  group_by(genres) %>%
+  summarize(
+    Count = n_distinct(userId),
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
+  )
+rating_by_genre <- rating_by_genre[order(rating_by_genre$Mean, decreasing = TRUE),]
+
+# Calculating rating by year - Used later for graph
+rating_by_year <- movie_ratings_expanded %>%
+  group_by(year) %>%
+  summarize(
+    Count = n_distinct(userId),
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
+  )
+rating_by_year <- rating_by_year[order(rating_by_year$year),]
+
+# Confidence Interval table - Used later for graph
+conf_interval <- data.frame(genre = c("Adventure", "Animation", "Children", "Comedy", "Fantasy", "Romance", "Drama", "Action", "Crime", "Thriller", "Horror", "War", "Musical", "Documentary", "Western", "Film-Noir", "Sci-Fi", "Mystery"),
+                            mean = c(3.20, 3.41, 3.09, 3.09, 3.18, 3.23, 3.28, 3.11, 3.24, 3.13, 2.83, 3.39, 3.23, 3.48, 3.25, 3.41, 3.10, 3.21),
+                            lower = c(3.16, 3.28, 3.02, 3.07, 3.12, 3.20, 3.26, 3.08, 3.20, 3.10, 2.77, 3.33, 3.15, 3.40, 3.15, 3.31, 3.04, 3.15),
+                            upper = c(3.25, 3.48, 3.16, 3.12, 3.24, 3.27, 3.31, 3.15, 3.28, 3.16, 2.89, 3.46, 3.30, 3.56, 3.36, 3.51, 3.15, 3.27))
+
+
+# Now we can begin writing - Now we can copy-paste our code from the master sheet to input our graphs in our paper.
+# Feel free to add more above.
+
+# BEGIN WRITING
+```    
+   
+    
+# Background   
+
+For a long time, we’ve liked to engross ourselves in fables and stories for ranging purposes. Cinema has become the modern medium to achieve this. From documentaries to action thrillers, it has become an integral part of any community; movies mirror what we believe and help redefine the narrative on how we see others in the world. Whether they’re utilized as a medium to relax after work or school, address key issues to drive social change, or therapeutically to tackle mental health, movies drive and shape our societies.   
+
+Data science can be a powerful tool for us to better contextualize our movie-watching experience. Can we quantitatively explain what kinds of movies might be better for us to watch than others? Is there data available in the world to address this? We decided to take on this challenge by using movie ratings to try to see what kinds of movies might be considered better than others.    
+
+# Dataset   
+
+[GroupLens](https://grouplens.org/datasets/movielens/) (Department of Computer Science and Engineering, the University of Minnesota, 2022) is a research lab, which among other things, specializes in a movie recommendation system through MovieLens, that utilizes IMDB user ratings to recommend movies to its users. Using two datasets, one with 10,329 movies, identified by a unique movieID, and their genres, and another with 105,339 IMDB ratings (scale of 5) across 668 Users (selected randomly), identified by a unique UserId, between March 1996 and September 2018, we attempt to perform exciting exploratory analysis of movie ratings, genres, and user preference to gain valuable insights. We show what the dataset looked like below:   
+
+* Movies
+```{r head1, results='markup'}
+xkabledplyhead(movies, title="Table 1: The First Five (5) Rows of Movies Dataset")
+```   
+
+* Ratings
+```{r head2, results='markup'}
+xkabledplyhead(ratings, title="Table 2: The First Five (5) Rows of Ratings Dataset")
+```   
+Since our data existed in two separate files, we needed to create a single set to perform analysis.   
+
+## Initial assumptions about the Data   
+
+As is always the case with Data Analysis, we too had few initial assumption about the dataset we were working with. We needed these assumptions to frame some of the SMART questions we wanted to answer. These assumptions can be found below:   
+
+* All movies had associated genres.   
+* All movies had only one associated genre.   
+* The number of user ratings were evenly spread out across movies, and hence genres.   
+* Movies present were released only during the specified time range.   
+
+SMART questions are - Specific, Measurable, Achievable, Relevant, and Time bound. Keeping this in mind along with the prior assumptions, we proceeded to frame questions we would like to investigate.   
+
+## SMART Questions   
+
+1. Which movie has the highest average rating across the user population between March 1996 and September 2018?    
+2. What is the average ratings of each genre using the movies in the sample, across the user population between March 1996 and September 2018?   
+3. Which genre is watched the most number of times by the user population between March 1996 and September 2018?   
+4. Which genre has the highest average rating using movies in the sample, across the user population between March 1996 and September 2018?   
+5. Which movie displays the maximum mixed reviews from the user population between March 1996 and September 2018?   
+6. Which genre displays the maximum mixed reviews, using the movies in the sample, from the user population between March 1996 and September 2018?   
+
+The aim of the analysis was to provide good insight into certain biases when it comes to rating movies, genres watched most by viewers, and how this could affect movie recommendation systems. We can then begin our analysis.
+
+# Breaking some assumptions with EDA   
+
+As we went about our EDA, we encountered a few problems with the initial dataset that required some creative problem solving on our end.   
+
+* The first problem we encountered was that our “genre” variable was not mutually exclusive. About 70% of movies had multiple genres assigned to them, while around 30% had one genre or no genre listed. For example, Toy Story (1995) had five different genres assigned to it (adventure, animation, children, comedy, and fantasy) while Othello (1995) only had one genre (drama).
+
+So the first step was in formatting the actual structure of the dataset. First, we expanded the dataset to have one row per genre of the movie. So, this resulted in five rows for Toy Story, one for each genre, and only one row for movies like Othello with only one genre. This is shown below:
+
+```{r head3, results='markup'}
+xkabledply(dummy_movie_genre_expanded[dummy_movie_genre_expanded$title %in% c("Toy Story (1995)","Othello (1995)")], title="Table 3: Expanded Dataset of Movies and Genres")
+```   
+
+The structure of this dataset was helpful for some of our EDA calculations, such as calculating proportions of genres in the User population, as well as creating frequency graphs for genres.   
+
+An additional manipulation that we did was to create 20 new variables (for each genre) with binary values to indicate whether that movie was included in the genre. In this dataset, each movie had one row with their corresponding genres being indicated with `1` in the appropriate columns. This is shown below:
+
+```{r head4, results='markup'}
+xkabledplyhead(dummy_movie_wide, title="Table 4: Twenty (20) New Engineered Features within the Dataset")
+```   
+
+* The proceeding problem we had with our genre variable was figuring out how to include it in our data analysis. Initially, we wanted to perform an ANOVA test to answer which genre had the highest average user ratings in the dataset. However, ANOVA assumes that all the factor variables are mutually exclusive, so this type of test would not be applicable to this kind of problem. Initially, we considered subsetting our data to those movies which only had one genre. However, this had the potential to insert some type of bias in our analysis. To rule this out, we hoped to perform a chi-squared goodness of fit test to see if the proportion of genres in the single-genre subset would be similar to the entire sample of movies. Unfortunately, this type of test was also not possible because our proportion of genres was not equal to 1.0 because they were not mutually exclusive. So, we decided to not use an ANOVA test and instead perform two-sample t-tests to compare each genre to the rest of the population to see if they tended to rank higher. The results of this test are described in detail later on.   
+   
+* The next significant distinction we needed to make was differentiating between **movie** population and the **user** population. Movie population would be used to make comments on the entire genre whereas User population would be used to make generalizations about a specific movie.   
+
+The dataset contained individual user ratings of available movies. We used group by analysis to calculate the mean movie rating for each movie across the users. Movie population consisted of one observation per movie with the mean movie rating from sample users. This was incorporated in the second table shown above. This dataset treated the mean rating of sample users as an absolute and therefore, provided insights into the movie population for each genre to make generalizations about the genres. The second population was the user population, which had one observation per rating which was incorporated into the first table shown above using a join on MovieId and ratings table. However, a thing to note here is that not all movies had the same number of ratings. This produced more bias towards movies that had more ratings in the dataset. Throughout our analysis, we used both populations to answer our proposed questions. The two tables after this manipulation are shown below:
+
+```{r head5, results='markup'}
+xkabledplyhead(movie_ratings_expanded,title="Table 5: Expanded Dataset showing the Extracted Movie Year")
+```   
+```{r head6, results='markup'}
+dummy_rating_mean <- ratings %>%
+  group_by(movieId) %>%
+  summarize(
+    mean_rating = mean(rating)
+  )
+movies_mean_rating <- left_join(dummy_movie_wide,dummy_rating_mean, by = 'movieId')
+xkabledplyhead(movies_mean_rating,title="Table 6: Movie Population")
+```   
+   
+* Our final hurdle was regarding our last two questions about trying to calculate mixed reviews. In order to solve this, we planned on taking the range of User reviews for a movie and use the highest as the movie with the most mixed reviews. However, the rating scale was only from 0.5 – 5.0, and most of the movies had a range from 0.5 to 5.0. So, we instead we turned to the standard deviation of movie ratings.   
+   
+* Our EDA also included some analysis regarding variables that were not involved in our questions, including the `Year` variable that we extracted. We initially thought that this would be a good variable to investigate, however, the years encompass a wider range than we expected:
+
+```{r}
+rating_by_year %>%
+  ggplot(
+    aes(
+      x = year,
+      y = Mean
+    )
+  ) + 
+  geom_col(fill = "lightblue") +
+   labs(
+    title = "Figure 1: User Movie Rating by Year",
+    x = "Year",
+    y = "Average User Rating (0-5)"
+  ) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+This was because users have been rating movies that came out decades ago. Although this did provide some interesting insight into the dataset, we did not do any further analysis with the year variable.   
+
+# Proceeding to answer our SMART Questions   
+
+## Which movie has the highest average rating across the user population between March 1996 and September 2018?    
+
+**Limitation**: To identify the average ratings for all movies in the User population, we'd have to make confidence intervals of all 10,000+ movies using the sample user ratings. And then we would need to rank these confidence intervals to arrive at an answer. Even then, we'd have overlapping intervals with an unclear answer.   
+   
+**The Approach**: Instead, we take a unique approach of identifying the movie with the highest mean rating from the sample user dataset, which at least has > 30 Users rating it for the Central limit theorem to be applicable. For the purpose of analysis, this movie becomes the winner. We then proceed to make 95% T - confidence intervals to answer our question for the User population.   
+   
+**Result**: 
+```{r, results='markup'}
+dummy_rating_usercount <- ratings %>%
+  group_by(movieId) %>%
+  summarize(
+    distinct_user_ratings = n_distinct(userId)
+  )
+
+movies_mean_rating_new <- left_join(movies_mean_rating,dummy_rating_usercount, by = 'movieId')
+
+dummy_subset <- movies_mean_rating_new[movies_mean_rating_new$distinct_user_ratings>30,]
+winner_movie <- dummy_subset[which.max(dummy_subset$mean_rating),]
+xkabledply(subset(winner_movie, select=c("movieId","title","genres","mean_rating","distinct_user_ratings")),title="Table 7: Movie with Highest User Ratings")
+```   
+
+As we can see from above, movieId = 1172 having title as = 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' has received the highest averaged rating across total of 37 Users. For the sake of analysis, this becomes our highest rated movie.   
+We then use Students T-distribution to create a 95% confidence interval for this movie to generalize to the User population.   
+   
+**The Conclusion**: Based on the above result, we say that the average rating for the movie 'Cinema Paradiso (Nuovo cinema Paradiso) (1989)' lies in the interval [4.242887, 4.676032] for the entire User population with a confidence level of 95% for the period between March 1996 and September 2018.   
+
+## What is the average ratings of each genre using the movies in the sample, across the user population between March 1996 and September 2018?   
+
+**Limitation**: We only have sample User data to calculate the average ratings of each Genre.   
+   
+**The Approach**: We attempted to answer this question by doing group by analysis from our user population table. The results of this analysis can be seen below:
+
+```{r, results='markup'}
+rating_by_genre %>%
+  ggplot(
+    aes(
+      x = fct_reorder(genres, Count, .desc = T),
+      y = Mean
+    )
+  ) +
+  geom_col(fill = "lightblue", color = "black") +
+  labs(
+    title = "Figure 2: User Movie Rating by Genre",
+    x = "Genre",
+    y = "Average User Rating (0-5)"
+  ) + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```   
+
+Looking at the graph above, we can see certain genres like Film-Noir and War had higher movie ratings than other films, at 3.91 and 3.78, respectively. Other movies, such as those with no genre listed and horror movies, had lower movie ratings, at 3.07 and 3.28 respectively.
+
+Not satisfied with this, we created the T-confidence intervals of each genre based on our movie population data that assumed the averaged sample user rating as an absolute for a movie. We plotted the confidence intervals:
+
+```{r, results='markup'}
+conf_interval <- as.tibble(conf_interval[order(conf_interval$mean, decreasing = TRUE),])
+
+conf_interval_p <- conf_interval %>%
+  ggplot(
+    aes(
+      x = mean,
+      y = fct_reorder(genre, desc(mean))
+    )
+  ) + 
+  geom_point() + 
+  geom_errorbar(aes(xmin = lower, xmax = upper)) +
+  labs(
+    title = "Figure 3: Confidence Intervals for Ratings by Genre",
+    x = "Mean Rating",
+    y = "Genre"
+  ) +
+  theme_bw()
+conf_interval_p
+```   
+**The Conclusion**: This shows similar results as the user population data and demonstrates some of the overlap between confidence intervals. We will discuss this more for question four.    
+
+## Which genre is watched the most number of times by the user population between March 1996 and September 2018?   
+
+**Limitation**: This proved difficult to answer, given that we didn’t have any data on viewership. Also the answer to this question was limited to the sample data and could not be extrapolated to user population.   
+   
+**The Approach**: Instead, we operated under the assumption that genres with the most ratings were likely to have more viewers. So, we calculated the number of users that rated each genre, which are shown below:
+
+```{r, results='markup'}
+rating_by_genre %>%
+  ggplot(
+    aes(
+      x = fct_reorder(genres, desc(Count)),
+      y = Count
+    )
+  ) +
+  geom_col(fill = "lightblue", color = "black") +
+  labs(
+    title = "Figure 4: Number of Distinct User Ratings by Genre",
+    x = "Genre",
+    y = "Number of Users"
+  ) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```   
+
+**The Conclusion**: The genre with the most users assigning ratings was drama, followed closely by comedy, adventure, and action.   
+
+An interesting observation was made here. The genres with the least amount of user ratings tended to be ranked higher than others. So, less people watched these genres but those who did, tended to enjoy them thoroughly. Genres like Film-Noir and Documentary fall in this category.  
+
+## Which genre has the highest average rating using movies in the sample, across the user population between March 1996 and September 2018?   
+
+**Limitation**: Answering this proved to be a challenge, because genre was not mutually exclusive, so ANOVA, which was the best statistical method for this question, was not possible.   
+   
+**The Approach**: In order to find the genre with the highest rating, we decided to implement two-sample t-tests for all of the genres in the movie population dataset, to see if there is a difference in the sample users rating of the genre and the ratings of all other genres. The corresponding average user rating and p-values from each of these tests is shown below:
+
+Table 8: Average User Rating across the Movie Genres
+
+Genre         | Average User Rating | p-value
+------------- | ------------------- | -------
+Documentary   | 3.48                | 8e-14 *
+Animation     | 3.41                | <2e-16 *
+Film-Noir     | 3.41                | 4e-6 *
+War           | 3.39                | 8e-11 *
+Drama         | 3.28                | <2e-16 *
+Western       | 3.25                | 0.1
+Crime         | 3.24                | 0.001 *
+Musical       | 3.23                | 0.2
+Romance       | 3.23                | 0.001 *
+Mystery       | 3.21                | 0.3
+Adventure     | 3.2                 | 0.2
+Fantasy       | 3.18                | 1
+Thriller      | 3.13                | 7e-04 *
+Action        | 3.11                | 2e-04 *
+Sci-Fi        | 3.10                | 0.003 *
+Children      | 3.09                | 0.01 *
+Comedy        | 3.09                | 3e-13 *
+Horror        | 2.83                | <2e-16   
+ 
+We used a significant level of $\alpha$ < 0.05 for our hypothesis testing. The t-tests showed that animation, romance, drama, crime, war, documentary, and film-noir had higher means when individually compared to the rest of the sample. Children, comedy, action, thriller, horror, and sci-fi, however, had lower average ratings when individually compared to the rest of the sample. The results of this give us a good understanding of how certain genres score based on averaged user ratings.   
+We can look back to our plot of the 95% confidence intervals to get a better understanding of what genres score the highest.
+
+```{r, results='markup'}
+conf_interval_p
+```   
+
+As we can see, Documentary has the highest mean rating at 3.48. This confidence interval does overlap with three other genres, animation, film-noir, and war.   
+   
+**The Conclusion**: Therefore, we can confidently say that one of these four genres receives the highest average user rating. On the other end of the scale, horror has the lowest average user rating at 2.83. The 95% confidence interval of this genre does not overlap with any other genre, so we can say with good confidence that horror movies are the lowest rating movie.   
+
+## Which movie displays the maximum mixed reviews from the user population between March 1996 and September 2018?   
+
+**The Limitation**: As previously mentioned, the initial thought was to use the range of ratings to find the movie with the most mixed reviews. However, this was not feasible as stated above.   
+   
+**The Approach**: Therefore, we turned our attention to the Standard Deviations of each movie from the sample user population data. We did a group by analysis of each movie and calculated it's standard deviation. We then selected the movie with highest standard deviation that had at least 30 user ratings just to be sure that our sample wasn't skewed. The result of this is shown in the table below:
+
+```{r, results='markup'}
+rating_by_movie <- movie_ratings_expanded %>%
+  group_by(movieId) %>%
+  summarize(
+    Count = n_distinct(userId),
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
+  )
+rating_by_movie <- subset(rating_by_movie,Count>30)
+
+rating_by_movie <- rating_by_movie[order(rating_by_movie$SD, decreasing = TRUE),]
+xkabledplyhead(rating_by_movie, title="Table 9: Top FIve (5) Movies with Highest Standard Deviation")
+```   
+
+**The conclusion**: From this table, we see that the movie with maximum Standard Deviation with User count>30, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled 'Transformers (2007)'.
+
+## Which genre displays the maximum mixed reviews, using the movies in the sample, from the user population between March 1996 and September 2018?   
+
+**The Approach**: This question is constraint to the same limitations as the previous question, therefore, we followed a similar approach. Instead, we performed a group by analysis for Genres. See table below:
+
+```{r, results='markup'}
+rating_by_genre <- subset(rating_by_genre,Count>30)
+
+rating_by_genre <- rating_by_genre[order(rating_by_genre$SD, decreasing = TRUE),]
+xkabledplyhead(rating_by_genre,title="Table 10: Top Five (5) Genres with Mixed Reviews")
+```   
+From this table, we see that the genre with maximum Standard Deviation, and hence, maximum mixed reviews is Horror.  
+
+*Note: We only selected movies that had more than thirty ratings. We soon realized that this data followed the law of large numbers (See Citation), which is that standard deviation tends to decrease as the sample size increases. This lead to an unreliable result for our answers to these questions.*
+*To do a fair analysis, we would need a constant number of users rating all the movies to find the movie and genre with the maximum standard deviation.*   
+
+# Conclusions   
+
+A few important conclusions from performing EDA and inferential statistics on this dataset are summed up below:   
+
+* Some genres like Film-Noir, War, Animation, and Documentary tend to have higher movie ratings while other genres like Horror, Thriller and Action tend to have lower movie ratings.   
+
+* Genres like Film - Noir have been watched by less people, but it is the best rated Genre. So less people watched it, but whoever did, loved it!   
+
+* Challenges with the dataset prevented us from fulling answering some of our SMART questions.   
+
+* We also realized that some SMART questions we developed were not answerable with statistical inference and hence weren't 'SMART' enough.   
+
+# References
+
+Edwin, Lo (2019). Rmd Template File 'Chicken Wings Dataset Exploratory Data Analysis.
+
+MovieLens Dataset (2022). Movie Ratings Dataset from March 1996 - September 2018. Department of Computer Science and Engineering, the University of Minnesota.
+

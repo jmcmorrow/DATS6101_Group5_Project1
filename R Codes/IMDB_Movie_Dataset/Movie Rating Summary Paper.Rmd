@@ -1,0 +1,111 @@
+---
+title: "Movie Rating Summary Paper"
+author: "Group 5"
+date: "2022-11-03"
+output: html_document
+output:
+  html_document:
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+---
+
+```{r init, include=FALSE}
+knitr::opts_chunk$set(warning = F, results = "hide", message = F)
+options(scientific=T, digits = 3) 
+```
+
+```{r importing data and preprosessing, include=FALSE}
+rm(list=ls())
+library(tidyverse)
+
+
+movies <- read_csv("movies.csv")
+ratings <- read_csv("ratings.csv")
+
+library(data.table)
+movies <- data.table(movies)
+dummy_movie_genre_expanded <- movies[, list(title,genres = unlist(strsplit(genres, split = "|", fixed = T))), by = movieId]
+
+# remove spaces
+dummy_movie_genre_expanded$genres <- str_trim(dummy_movie_genre_expanded$genres)
+str(dummy_movie_genre_expanded)
+
+# joining datasets
+movie_ratings_expanded <- full_join(dummy_movie_genre_expanded, ratings, by = "movieId")
+
+# Creating New Variables - To perform 2 sample t-tests for comparing each Genre, with the rest of the Genre.
+dummy_movie_wide <- movies %>%
+  mutate(
+    Adventure = if_else(grepl("Adventure", movies$genres), 1, 0),
+    Animation = if_else(grepl("Animation", movies$genres), 1, 0),
+    Children = if_else(grepl("Children", movies$genres), 1, 0),
+    Comedy = if_else(grepl("Comedy", movies$genres), 1, 0),
+    Fantasy = if_else(grepl("Fantasy", movies$genres), 1, 0),
+    Romance = if_else(grepl("Romance", movies$genres), 1, 0),
+    Drama = if_else(grepl("Drama", movies$genres), 1, 0),
+    Action = if_else(grepl("Action", movies$genres), 1, 0),
+    Crime = if_else(grepl("Crime", movies$genres), 1, 0),
+    Thriller = if_else(grepl("Thriller", movies$genres), 1, 0),
+    Horror = if_else(grepl("Horror", movies$genres), 1, 0),
+    Mystery = if_else(grepl("Mystery", movies$genres), 1, 0),
+    `Sci-Fi` = if_else(grepl("Sci-Fi", movies$genres), 1, 0),
+    IMAX = if_else(grepl("IMAX", movies$genres), 1, 0),
+    War = if_else(grepl("War", movies$genres), 1, 0),
+    Musical = if_else(grepl("Musical", movies$genres), 1, 0),
+    Documentary = if_else(grepl("Documentary", movies$genres), 1, 0),
+    Western = if_else(grepl("Western", movies$genres), 1, 0),
+    `Film-Noir` = if_else(grepl("Film-Noir", movies$genres), 1, 0),
+    No_genre_listed = if_else(grepl("(no genres listed)", movies$genres), 1, 0)
+  )
+
+# Adding year
+movie_ratings_expanded$year <- str_sub(movie_ratings_expanded$title, start = nchar(movie_ratings_expanded$title)-4, end = nchar(movie_ratings_expanded$title)-1) %>% str_trim()
+movie_ratings_expanded$year <- as.factor(movie_ratings_expanded$year)
+
+# Calulating movie by genre - Used later for graph
+rating_by_genre <- movie_ratings_expanded %>%
+  group_by(genres) %>%
+  summarize(
+    Count = n_distinct(userId),
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
+  )
+rating_by_genre <- rating_by_genre[order(rating_by_genre$Mean, decreasing = TRUE),]
+
+# Calculating rating by year - Used later for graph
+rating_by_year <- movie_ratings_expanded %>%
+  group_by(year) %>%
+  summarize(
+    Count = n_distinct(userId),
+    Mean = mean(rating, na.rm=T),
+    SD = sd(rating, na.rm=T),
+    Min = min(rating, na.rm=T),
+    Max = max(rating, na.rm=T)
+  )
+rating_by_year <- rating_by_year[order(rating_by_year$year),]
+
+# Confidence Interval table - Used later for graph
+conf_interval <- data.frame(genre = c("Adventure", "Animation", "Children", "Comedy", "Fantasy", "Romance", "Drama", "Action", "Crime", "Thriller", "Horror", "War", "Musical", "Documentary", "Western", "Film-Noir", "Sci-Fi", "Mystery"),
+                            mean = c(3.20, 3.41, 3.09, 3.09, 3.18, 3.23, 3.28, 3.11, 3.24, 3.13, 2.83, 3.39, 3.23, 3.48, 3.25, 3.41, 3.10, 3.21),
+                            lower = c(3.16, 3.28, 3.02, 3.07, 3.12, 3.20, 3.26, 3.08, 3.20, 3.10, 2.77, 3.33, 3.15, 3.40, 3.15, 3.31, 3.04, 3.15),
+                            upper = c(3.25, 3.48, 3.16, 3.12, 3.24, 3.27, 3.31, 3.15, 3.28, 3.16, 2.89, 3.46, 3.30, 3.56, 3.36, 3.51, 3.15, 3.27))
+
+
+# Now we can begin writing - Now we can copy-paste our code from the master sheet to input our graphs in our paper.
+# Feel free to add more above.
+
+# BEGIN WRITING
+```
+
+
+  For a long time, we’ve liked to engross ourselves in fables and stories for ranging purposes. Cinema has become the modern medium to achieve this. From documentaries to action thrillers, it has become an integral part of any community; movies mirror what we believe and help redefine the narrative on how we see others in the world. Whether they’re utilized as a medium to relax after work or school, address key issues to drive social change, or therapeutically to tackle mental health, movies drive and shape our societies.
+
+  GroupLens is a research lab in the Dept. of Computer Science of University of Minnesota, which among other things, specializes in a movie recommendation system through MovieLens, that utilizes user ratings to recommend movies to its users. Using two datasets, one with 10,329 movies and their genres, and another with 105,339 IMDB ratings (scale of 5) across 668 Users (selected randomly) between March 1996 and September 2018, we can perform exciting exploratory analysis of movie ratings, genres, and user preference. We have compiled both datasets into a single dataset and also split the genres variable into multiple unique rows to be able to utilize them. This has increased the observations of the final dataset to 299,937.

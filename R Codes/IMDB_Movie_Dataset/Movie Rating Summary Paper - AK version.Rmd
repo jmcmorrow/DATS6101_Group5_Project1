@@ -212,7 +212,7 @@ This was because users have been rating movies that came out decades ago. Althou
 **The Approach**: Instead, we take a unique approach of identifying the movie with the highest mean rating from the sample user dataset, which at least has > 30 Users rating it for the Central limit theorem to be applicable. For the purpose of analysis, this movie becomes the winner. We then proceed to make 95% T - confidence intervals to answer our question for the User population.   
    
 **Result**: 
-```{r}
+```{r, results='markup'}
 dummy_rating_usercount <- ratings %>%
   group_by(movieId) %>%
   summarize(
@@ -328,7 +328,7 @@ Children      | 3.09                | 0.01 *
 Comedy        | 3.09                | 3e-13 *
 Horror        | 2.83                | <2e-16   
  
-We used a significant level of $\alpha $ < 0.05 for our hypothesis testing. The t-tests showed that animation, romance, drama, crime, war, documentary, and film-noir had higher means when individually compared to the rest of the sample. Children, comedy, action, thriller, horror, and sci-fi, however, had lower average ratings when individually compared to the rest of the sample. The results of this give us a good understanding of how certain genres score based on averaged user ratings.   
+We used a significant level of $\alpha$ < 0.05 for our hypothesis testing. The t-tests showed that animation, romance, drama, crime, war, documentary, and film-noir had higher means when individually compared to the rest of the sample. Children, comedy, action, thriller, horror, and sci-fi, however, had lower average ratings when individually compared to the rest of the sample. The results of this give us a good understanding of how certain genres score based on averaged user ratings.   
 We can look back to our plot of the 95% confidence intervals to get a better understanding of what genres score the highest.   
 ```{r, results='markup'}
 conf_interval_p
@@ -366,7 +366,7 @@ xkabledplyhead(rating_by_movie, title="Top 5 movies with highest standard deviat
 rating_by_genre <- subset(rating_by_genre,Count>30)
 
 rating_by_genre <- rating_by_genre[order(rating_by_genre$SD, decreasing = TRUE),]
-rating_by_genre
+xkabledplyhead(rating_by_genre,title="Top 5 Genres with mixed reviews")
 ```   
 From this table, we see that the genre with maximum Standard Deviation, and hence, maximum mixed reviews is Horror.  
 

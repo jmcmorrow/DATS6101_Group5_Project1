@@ -2609,43 +2609,39 @@ Analysis of Movie Ratings</h1>
 Analysis of Movie Ratings</a></h2>
     <div id="toc">
       <ul>
-      <li><a href="#background" id="toc-background">Background</a></li>
-      <li><a href="#dataset" id="toc-dataset">Dataset</a>
+      <li><a href="#background" id="toc-background"><span class="toc-section-number">1</span> Background</a></li>
+      <li><a href="#dataset" id="toc-dataset"><span class="toc-section-number">2</span> Dataset</a>
       <ul>
-      <li><a href="#initial-assumptions-about-the-data" id="toc-initial-assumptions-about-the-data">Initial assumptions
-      about the Data</a></li>
-      <li><a href="#smart-questions" id="toc-smart-questions">SMART
-      Questions</a></li>
+      <li><a href="#initial-assumptions-about-the-data" id="toc-initial-assumptions-about-the-data"><span class="toc-section-number">2.1</span> Initial assumptions about
+      the Data</a></li>
+      <li><a href="#smart-questions" id="toc-smart-questions"><span class="toc-section-number">2.2</span> SMART Questions</a></li>
       </ul></li>
-      <li><a href="#breaking-some-assumptions-with-eda" id="toc-breaking-some-assumptions-with-eda">Breaking some
-      assumptions with EDA</a></li>
-      <li><a href="#proceeding-to-answer-our-smart-questions" id="toc-proceeding-to-answer-our-smart-questions">Proceeding to
-      answer our SMART Questions</a>
+      <li><a href="#breaking-some-assumptions-with-eda" id="toc-breaking-some-assumptions-with-eda"><span class="toc-section-number">3</span> Breaking some assumptions with
+      EDA</a></li>
+      <li><a href="#proceeding-to-answer-our-smart-questions" id="toc-proceeding-to-answer-our-smart-questions"><span class="toc-section-number">4</span> Proceeding to answer our SMART
+      Questions</a>
       <ul>
-      <li><a href="#which-movie-has-the-highest-average-rating-across-the-user-population-between-march-1996-and-september-2018" id="toc-which-movie-has-the-highest-average-rating-across-the-user-population-between-march-1996-and-september-2018">Which
-      movie has the highest average rating across the user population
-      between March 1996 and September 2018?</a></li>
-      <li><a href="#what-is-the-average-ratings-of-each-genre-using-the-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" id="toc-what-is-the-average-ratings-of-each-genre-using-the-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018">What
-      is the average ratings of each genre using the movies in the
-      sample, across the user population between March 1996 and
+      <li><a href="#which-movie-has-the-highest-average-rating-across-the-user-population-between-march-1996-and-september-2018" id="toc-which-movie-has-the-highest-average-rating-across-the-user-population-between-march-1996-and-september-2018"><span class="toc-section-number">4.1</span> Which movie has the highest
+      average rating across the user population between March 1996 and
       September 2018?</a></li>
-      <li><a href="#which-genre-is-watched-the-most-number-of-times-by-the-user-population-between-march-1996-and-september-2018" id="toc-which-genre-is-watched-the-most-number-of-times-by-the-user-population-between-march-1996-and-september-2018">Which
-      genre is watched the most number of times by the user population
-      between March 1996 and September 2018?</a></li>
-      <li><a href="#which-genre-has-the-highest-average-rating-using-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" id="toc-which-genre-has-the-highest-average-rating-using-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018">Which
-      genre has the highest average rating using movies in the sample,
-      across the user population between March 1996 and September
-      2018?</a></li>
-      <li><a href="#which-movie-displays-the-maximum-mixed-reviews-from-the-user-population-between-march-1996-and-september-2018" id="toc-which-movie-displays-the-maximum-mixed-reviews-from-the-user-population-between-march-1996-and-september-2018">Which
-      movie displays the maximum mixed reviews from the user population
-      between March 1996 and September 2018?</a></li>
-      <li><a href="#which-genre-displays-the-maximum-mixed-reviews-using-the-movies-in-the-sample-from-the-user-population-between-march-1996-and-september-2018" id="toc-which-genre-displays-the-maximum-mixed-reviews-using-the-movies-in-the-sample-from-the-user-population-between-march-1996-and-september-2018">Which
-      genre displays the maximum mixed reviews, using the movies in the
-      sample, from the user population between March 1996 and September
-      2018?</a></li>
+      <li><a href="#what-is-the-average-ratings-of-each-genre-using-the-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" id="toc-what-is-the-average-ratings-of-each-genre-using-the-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018"><span class="toc-section-number">4.2</span> What is the average ratings
+      of each genre using the movies in the sample, across the user
+      population between March 1996 and September 2018?</a></li>
+      <li><a href="#which-genre-is-watched-the-most-number-of-times-by-the-user-population-between-march-1996-and-september-2018" id="toc-which-genre-is-watched-the-most-number-of-times-by-the-user-population-between-march-1996-and-september-2018"><span class="toc-section-number">4.3</span> Which genre is watched the
+      most number of times by the user population between March 1996 and
+      September 2018?</a></li>
+      <li><a href="#which-genre-has-the-highest-average-rating-using-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" id="toc-which-genre-has-the-highest-average-rating-using-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018"><span class="toc-section-number">4.4</span> Which genre has the highest
+      average rating using movies in the sample, across the user
+      population between March 1996 and September 2018?</a></li>
+      <li><a href="#which-movie-displays-the-maximum-mixed-reviews-from-the-user-population-between-march-1996-and-september-2018" id="toc-which-movie-displays-the-maximum-mixed-reviews-from-the-user-population-between-march-1996-and-september-2018"><span class="toc-section-number">4.5</span> Which movie displays the
+      maximum mixed reviews from the user population between March 1996
+      and September 2018?</a></li>
+      <li><a href="#which-genre-displays-the-maximum-mixed-reviews-using-the-movies-in-the-sample-from-the-user-population-between-march-1996-and-september-2018" id="toc-which-genre-displays-the-maximum-mixed-reviews-using-the-movies-in-the-sample-from-the-user-population-between-march-1996-and-september-2018"><span class="toc-section-number">4.6</span> Which genre displays the
+      maximum mixed reviews, using the movies in the sample, from the
+      user population between March 1996 and September 2018?</a></li>
       </ul></li>
-      <li><a href="#conclusions" id="toc-conclusions">Conclusions</a></li>
-      <li><a href="#references" id="toc-references">References</a></li>
+      <li><a href="#conclusions" id="toc-conclusions"><span class="toc-section-number">5</span> Conclusions</a></li>
+      <li><a href="#references" id="toc-references"><span class="toc-section-number">6</span> References</a></li>
       </ul>
     </div>
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
@@ -2661,8 +2657,8 @@ McMorrow, Aditya Kumar, Anthony C. Okoye</p>
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
 <div id="main">
-<div id="background" class="section level1">
-<h1>Background</h1>
+<div id="background" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Background</h1>
 <p>For a long time, we’ve liked to engross ourselves in fables and
 stories for ranging purposes. Cinema has become the modern medium to
 achieve this. From documentaries to action thrillers, it has become an
@@ -2678,8 +2674,8 @@ available in the world to address this? We decided to take on this
 challenge by using movie ratings to try to see what kinds of movies
 might be considered better than others.</p>
 </div>
-<div id="dataset" class="section level1">
-<h1>Dataset</h1>
+<div id="dataset" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Dataset</h1>
 <p><a href="https://grouplens.org/datasets/movielens/">GroupLens</a>
 (Department of Computer Science and Engineering, the University of
 Minnesota, 2022) is a research lab, which among other things,
@@ -2865,8 +2861,9 @@ timestamp
 Since our data existed in two separate files, we needed to create a
 single set to perform analysis.</li>
 </ul>
-<div id="initial-assumptions-about-the-data" class="section level2">
-<h2>Initial assumptions about the Data</h2>
+<div id="initial-assumptions-about-the-data" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Initial assumptions
+about the Data</h2>
 <p>As is always the case with Data Analysis, we too had few initial
 assumption about the dataset we were working with. We needed these
 assumptions to frame some of the SMART questions we wanted to answer.
@@ -2886,8 +2883,8 @@ range.</li>
 Time bound. Keeping this in mind along with the prior assumptions, we
 proceeded to frame questions we would like to investigate.</p>
 </div>
-<div id="smart-questions" class="section level2">
-<h2>SMART Questions</h2>
+<div id="smart-questions" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> SMART Questions</h2>
 <ol style="list-style-type: decimal">
 <li>Which movie has the highest average rating across the user
 population between March 1996 and September 2018?<br />
@@ -2916,8 +2913,9 @@ and how this could affect movie recommendation systems.<br />
 We then began our analysis!!</p>
 </div>
 </div>
-<div id="breaking-some-assumptions-with-eda" class="section level1">
-<h1>Breaking some assumptions with EDA</h1>
+<div id="breaking-some-assumptions-with-eda" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Breaking some
+assumptions with EDA</h1>
 <p>As we went about our EDA, we encountered a few problems with the
 initial dataset that required some creative problem solving on our
 end.</p>
@@ -4120,11 +4118,13 @@ dataset, we did not do any further analysis with the year
 variable.</p></li>
 </ul>
 </div>
-<div id="proceeding-to-answer-our-smart-questions" class="section level1">
-<h1>Proceeding to answer our SMART Questions</h1>
-<div id="which-movie-has-the-highest-average-rating-across-the-user-population-between-march-1996-and-september-2018" class="section level2">
-<h2>Which movie has the highest average rating across the user
-population between March 1996 and September 2018?</h2>
+<div id="proceeding-to-answer-our-smart-questions" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Proceeding to answer
+our SMART Questions</h1>
+<div id="which-movie-has-the-highest-average-rating-across-the-user-population-between-march-1996-and-september-2018" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Which movie has the
+highest average rating across the user population between March 1996 and
+September 2018?</h2>
 <p><strong>Limitation</strong>: To identify the average ratings for all
 movies in the User population, we’d have to make confidence intervals of
 all 10,000+ movies using the sample user ratings. And then we would need
@@ -4136,7 +4136,50 @@ dataset, which at least has &gt; 30 Users rating it for the Central
 limit theorem to be applicable. For the purpose of analysis, this movie
 becomes the winner. We then proceed to make 95% T - confidence intervals
 to answer our question for the User population.</p>
-<p><strong>Result</strong>:</p>
+<strong>Result</strong>:
+<table class="table table-striped" style="width: auto !important; ">
+<caption>
+Winner Movie
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+movieId
+</th>
+<th style="text-align:left;">
+title
+</th>
+<th style="text-align:left;">
+genres
+</th>
+<th style="text-align:right;">
+mean_rating
+</th>
+<th style="text-align:right;">
+distinct_user_ratings
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+1172
+</td>
+<td style="text-align:left;">
+Cinema Paradiso (Nuovo cinema Paradiso) (1989)
+</td>
+<td style="text-align:left;">
+Drama
+</td>
+<td style="text-align:right;">
+4.46
+</td>
+<td style="text-align:right;">
+37
+</td>
+</tr>
+</tbody>
+</table>
 <p>As we can see from above, movieId = 1172 having title as = ‘Cinema
 Paradiso (Nuovo cinema Paradiso) (1989)’ has received the highest
 averaged rating across total of 37 Users. For the sake of analysis, this
@@ -4149,10 +4192,10 @@ Paradiso) (1989)’ lies in the interval [4.242887, 4.676032] for the
 entire User population with a confidence level of 95% for the period
 between March 1996 and September 2018.</p>
 </div>
-<div id="what-is-the-average-ratings-of-each-genre-using-the-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" class="section level2">
-<h2>What is the average ratings of each genre using the movies in the
-sample, across the user population between March 1996 and September
-2018?</h2>
+<div id="what-is-the-average-ratings-of-each-genre-using-the-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> What is the average
+ratings of each genre using the movies in the sample, across the user
+population between March 1996 and September 2018?</h2>
 <p><strong>Limitation</strong>: We only have sample User data to
 calculate the average ratings of each Genre.</p>
 <p><strong>The Approach</strong>: We attempted to answer this question
@@ -4173,9 +4216,10 @@ intervals:<br />
 population data and demonstrates some of the overlap between confidence
 intervals. We will discuss this more for question four.</p>
 </div>
-<div id="which-genre-is-watched-the-most-number-of-times-by-the-user-population-between-march-1996-and-september-2018" class="section level2">
-<h2>Which genre is watched the most number of times by the user
-population between March 1996 and September 2018?</h2>
+<div id="which-genre-is-watched-the-most-number-of-times-by-the-user-population-between-march-1996-and-september-2018" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> Which genre is
+watched the most number of times by the user population between March
+1996 and September 2018?</h2>
 <p><strong>Limitation</strong>: This proved difficult to answer, given
 that we didn’t have any data on viewership. Also the answer to this
 question was limited to the sample data and could not be extrapolated to
@@ -4194,10 +4238,10 @@ people watched these genres but those who did, tended to enjoy them
 thoroughly. Genres like Film-Noir and Documentary fall in this
 category.</p>
 </div>
-<div id="which-genre-has-the-highest-average-rating-using-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" class="section level2">
-<h2>Which genre has the highest average rating using movies in the
-sample, across the user population between March 1996 and September
-2018?</h2>
+<div id="which-genre-has-the-highest-average-rating-using-movies-in-the-sample-across-the-user-population-between-march-1996-and-september-2018" class="section level2" number="4.4">
+<h2><span class="header-section-number">4.4</span> Which genre has the
+highest average rating using movies in the sample, across the user
+population between March 1996 and September 2018?</h2>
 <p><strong>Limitation</strong>: Answering this proved to be a challenge,
 because genre was not mutually exclusive, so ANOVA, which was the best
 statistical method for this question, was not possible.</p>
@@ -4308,7 +4352,7 @@ from each of these tests is shown below:</p>
 </tr>
 </tbody>
 </table>
-<p>We used a significant level of $$ &lt; 0.05 for our hypothesis
+<p>We used a significant level of <span class="math inline">\(\alpha\)</span> &lt; 0.05 for our hypothesis
 testing. The t-tests showed that animation, romance, drama, crime, war,
 documentary, and film-noir had higher means when individually compared
 to the rest of the sample. Children, comedy, action, thriller, horror,
@@ -4329,9 +4373,10 @@ at 2.83. The 95% confidence interval of this genre does not overlap with
 any other genre, so we can say with good confidence that horror movies
 are the lowest rating movie.</p>
 </div>
-<div id="which-movie-displays-the-maximum-mixed-reviews-from-the-user-population-between-march-1996-and-september-2018" class="section level2">
-<h2>Which movie displays the maximum mixed reviews from the user
-population between March 1996 and September 2018?</h2>
+<div id="which-movie-displays-the-maximum-mixed-reviews-from-the-user-population-between-march-1996-and-september-2018" class="section level2" number="4.5">
+<h2><span class="header-section-number">4.5</span> Which movie displays
+the maximum mixed reviews from the user population between March 1996
+and September 2018?</h2>
 <p><strong>The Limitation</strong>: As previously mentioned, the initial
 thought was to use the range of ratings to find the movie with the most
 mixed reviews. However, this was not feasible as stated above.</p>
@@ -4475,36 +4520,144 @@ movie with maximum Standard Deviation with User count&gt;30, and hence,
 maximum mixed reviews is movieId = 53996, which is the movie titled =
 Transformers (2007)</p>
 </div>
-<div id="which-genre-displays-the-maximum-mixed-reviews-using-the-movies-in-the-sample-from-the-user-population-between-march-1996-and-september-2018" class="section level2">
-<h2>Which genre displays the maximum mixed reviews, using the movies in
-the sample, from the user population between March 1996 and September
-2018?</h2>
-<p><strong>The Approach</strong>: This question is constraint to the
-same limitations as the previous question, therefore, we followed a
-similar approach. Instead, we performed a group by analysis for Genres.
-See table below:</p>
-<pre><code>## # A tibble: 19 × 6
-##    genres      Count  Mean    SD   Min   Max
-##    &lt;chr&gt;       &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-##  1 Horror        596  3.28 1.14    0.5     5
-##  2 Sci-Fi        660  3.45 1.09    0.5     5
-##  3 Fantasy       645  3.50 1.07    0.5     5
-##  4 Comedy        668  3.42 1.07    0.5     5
-##  5 Action        666  3.45 1.06    0.5     5
-##  6 Children      614  3.44 1.05    0.5     5
-##  7 Adventure     667  3.52 1.04    0.5     5
-##  8 Thriller      666  3.50 1.03    0.5     5
-##  9 Musical       538  3.57 1.03    0.5     5
-## 10 Romance       663  3.54 1.02    0.5     5
-## 11 Crime         663  3.64 1.01    0.5     5
-## 12 IMAX          448  3.64 0.997   0.5     5
-## 13 Mystery       621  3.65 0.994   0.5     5
-## 14 Western       469  3.57 0.991   0.5     5
-## 15 Animation     574  3.64 0.985   0.5     5
-## 16 Drama         669  3.65 0.985   0.5     5
-## 17 Documentary   250  3.64 0.982   0.5     5
-## 18 War           601  3.78 0.969   0.5     5
-## 19 Film-Noir     288  3.91 0.884   0.5     5</code></pre>
+<div id="which-genre-displays-the-maximum-mixed-reviews-using-the-movies-in-the-sample-from-the-user-population-between-march-1996-and-september-2018" class="section level2" number="4.6">
+<h2><span class="header-section-number">4.6</span> Which genre displays
+the maximum mixed reviews, using the movies in the sample, from the user
+population between March 1996 and September 2018?</h2>
+<strong>The Approach</strong>: This question is constraint to the same
+limitations as the previous question, therefore, we followed a similar
+approach. Instead, we performed a group by analysis for Genres. See
+table below:<br />
+
+<table class="table table-striped" style="width: auto !important; ">
+<caption>
+Top 5 Genres with mixed reviews
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+genres
+</th>
+<th style="text-align:right;">
+Count
+</th>
+<th style="text-align:right;">
+Mean
+</th>
+<th style="text-align:right;">
+SD
+</th>
+<th style="text-align:right;">
+Min
+</th>
+<th style="text-align:right;">
+Max
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Horror
+</td>
+<td style="text-align:right;">
+596
+</td>
+<td style="text-align:right;">
+3.28
+</td>
+<td style="text-align:right;">
+1.14
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sci-Fi
+</td>
+<td style="text-align:right;">
+660
+</td>
+<td style="text-align:right;">
+3.45
+</td>
+<td style="text-align:right;">
+1.09
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fantasy
+</td>
+<td style="text-align:right;">
+645
+</td>
+<td style="text-align:right;">
+3.50
+</td>
+<td style="text-align:right;">
+1.07
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Comedy
+</td>
+<td style="text-align:right;">
+668
+</td>
+<td style="text-align:right;">
+3.42
+</td>
+<td style="text-align:right;">
+1.07
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Action
+</td>
+<td style="text-align:right;">
+666
+</td>
+<td style="text-align:right;">
+3.45
+</td>
+<td style="text-align:right;">
+1.06
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+</tbody>
+</table>
 <p>From this table, we see that the genre with maximum Standard
 Deviation, and hence, maximum mixed reviews is Horror.</p>
 <p><em>Note: We only selected movies that had more than thirty ratings.
@@ -4516,9 +4669,10 @@ constant number of users rating all the movies to find the movie and
 genre with the maximum standard deviation.</em></p>
 </div>
 </div>
-<div id="conclusions" class="section level1">
-<h1>Conclusions</h1>
-<p>A few important conclusions from this EDA are summed up below:</p>
+<div id="conclusions" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Conclusions</h1>
+<p>A few important conclusions from performing EDA and inferential
+statistics on this dataset are summed up below:</p>
 <ul>
 <li><p>Some genres like Film-Noir,War, Animation, and Documentary tend
 to have higher movie ratings.</p></li>
@@ -4534,8 +4688,8 @@ answerable with statistical inference and hence weren’t ‘SMART’
 enough.</p></li>
 </ul>
 </div>
-<div id="references" class="section level1">
-<h1>References</h1>
+<div id="references" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> References</h1>
 </div>
 </div>
 

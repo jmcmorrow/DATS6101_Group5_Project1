@@ -151,14 +151,12 @@ The aim of the analysis was to provide good insight into certain biases when it 
 
 As we went about our EDA, we encountered a few problems with the initial dataset that required some creative problem solving on our end.   
 
-* The first problem we encountered was that our “genre” variable was not mutually exclusive. About 70% of movies had multiple genres assigned to them, while around 30% had one genre or no genre listed. For example, Toy Story (1995) had five different genres assigned to it (adventure, animation, children, comedy, and fantasy) while Othello (1995) only had one genre (drama).
-
+1. The first problem we encountered was that our “genre” variable was not mutually exclusive. About 70% of movies had multiple genres assigned to them, while around 30% had one genre or no genre listed. For example, Toy Story (1995) had five different genres assigned to it (adventure, animation, children, comedy, and fantasy) while Othello (1995) only had one genre (drama).
 So the first step was in formatting the actual structure of the dataset. First, we expanded the dataset to have one row per genre of the movie. So, this resulted in five rows for Toy Story, one for each genre, and only one row for movies like Othello with only one genre. This is shown below:
 
 ```{r head3, results='markup'}
 xkabledply(dummy_movie_genre_expanded[dummy_movie_genre_expanded$title %in% c("Toy Story (1995)","Othello (1995)")], title="Table 3: Expanded Dataset of Movies and Genres")
 ```   
-
 The structure of this dataset was helpful for some of our EDA calculations, such as calculating proportions of genres in the User population, as well as creating frequency graphs for genres.   
 
 An additional manipulation that we did was to create 20 new variables (for each genre) with binary values to indicate whether that movie was included in the genre. In this dataset, each movie had one row with their corresponding genres being indicated with `1` in the appropriate columns. This is shown below:
@@ -167,10 +165,10 @@ An additional manipulation that we did was to create 20 new variables (for each 
 xkabledplyhead(dummy_movie_wide, title="Table 4: Twenty (20) New Engineered Features within the Dataset")
 ```   
 
-* The proceeding problem we had with our genre variable was figuring out how to include it in our data analysis. Initially, we wanted to perform an ANOVA test to answer which genre had the highest average user ratings in the dataset. However, ANOVA assumes that all the factor variables are mutually exclusive, so this type of test would not be applicable to this kind of problem. Initially, we considered subsetting our data to those movies which only had one genre. However, this had the potential to insert some type of bias in our analysis. To rule this out, we hoped to perform a chi-squared goodness of fit test to see if the proportion of genres in the single-genre subset would be similar to the entire sample of movies. Unfortunately, this type of test was also not possible because our proportion of genres was not equal to 1.0 because they were not mutually exclusive. So, we decided to not use an ANOVA test and instead perform two-sample t-tests to compare each genre to the rest of the population to see if they tended to rank higher. The results of this test are described in detail later on.   
-   
-* The next significant distinction we needed to make was differentiating between **movie** population and the **user** population. Movie population would be used to make comments on the entire genre whereas User population would be used to make generalizations about a specific movie.   
-
+2. The proceeding problem we had with our genre variable was figuring out how to include it in our data analysis. Initially, we wanted to perform an ANOVA test to answer which genre had the highest average user ratings in the dataset. However, ANOVA assumes that all the factor variables are mutually exclusive, so this type of test would not be applicable to this kind of problem. Initially, we considered subsetting our data to those movies which only had one genre. However, this had the potential to insert some type of bias in our analysis. To rule this out, we hoped to perform a chi-squared goodness of fit test to see if the proportion of genres in the single-genre subset would be similar to the entire sample of movies. Unfortunately, this type of test was also not possible because our proportion of genres was not equal to 1.0 because they were not mutually exclusive. So, we decided to not use an ANOVA test and instead perform two-sample t-tests to compare each genre to the rest of the population to see if they tended to rank higher. The results of this test are described in detail later on.   
+       
+    
+3. The next significant distinction we needed to make was differentiating between **movie** population and the **user** population. Movie population would be used to make comments on the entire genre whereas User population would be used to make generalizations about a specific movie.   
 The dataset contained individual user ratings of available movies. We used group by analysis to calculate the mean movie rating for each movie across the users. Movie population consisted of one observation per movie with the mean movie rating from sample users. This was incorporated in the second table shown above. This dataset treated the mean rating of sample users as an absolute and therefore, provided insights into the movie population for each genre to make generalizations about the genres. The second population was the user population, which had one observation per rating which was incorporated into the first table shown above using a join on MovieId and ratings table. However, a thing to note here is that not all movies had the same number of ratings. This produced more bias towards movies that had more ratings in the dataset. Throughout our analysis, we used both populations to answer our proposed questions. The two tables after this manipulation are shown below:
 
 ```{r head5, results='markup'}
@@ -185,11 +183,11 @@ dummy_rating_mean <- ratings %>%
 movies_mean_rating <- left_join(dummy_movie_wide,dummy_rating_mean, by = 'movieId')
 xkabledplyhead(movies_mean_rating,title="Table 6: Movie Population")
 ```   
-   
-* Our final hurdle was regarding our last two questions about trying to calculate mixed reviews. In order to solve this, we planned on taking the range of User reviews for a movie and use the highest as the movie with the most mixed reviews. However, the rating scale was only from 0.5 – 5.0, and most of the movies had a range from 0.5 to 5.0. So, we instead we turned to the standard deviation of movie ratings.   
-   
-* Our EDA also included some analysis regarding variables that were not involved in our questions, including the `Year` variable that we extracted. We initially thought that this would be a good variable to investigate, however, the years encompass a wider range than we expected:
-
+    
+4. Our final hurdle was regarding our last two questions about trying to calculate mixed reviews. In order to solve this, we planned on taking the range of User reviews for a movie and use the highest as the movie with the most mixed reviews. However, the rating scale was only from 0.5 – 5.0, and most of the movies had a range from 0.5 to 5.0. So, we instead we turned to the standard deviation of movie ratings.   
+    
+       
+5. Our EDA also included some analysis regarding variables that were not involved in our questions, including the `Year` variable that we extracted. We initially thought that this would be a good variable to investigate, however, the years encompass a wider range than we expected:
 ```{r}
 rating_by_year %>%
   ggplot(
@@ -206,7 +204,7 @@ rating_by_year %>%
   ) + 
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 90))
-```
+```   
 This was because users have been rating movies that came out decades ago. Although this did provide some interesting insight into the dataset, we did not do any further analysis with the year variable.   
 
 # Proceeding to answer our SMART Questions   
@@ -374,7 +372,7 @@ rating_by_movie <- movie_ratings_expanded %>%
 rating_by_movie <- subset(rating_by_movie,Count>30)
 
 rating_by_movie <- rating_by_movie[order(rating_by_movie$SD, decreasing = TRUE),]
-xkabledplyhead(rating_by_movie, title="Table 9: Top FIve (5) Movies with Highest Standard Deviation")
+xkabledplyhead(rating_by_movie, title="Table 9: Top Five (5) Movies with Mixed Reviews")
 ```   
 
 **The conclusion**: From this table, we see that the movie with maximum Standard Deviation with User count>30, and hence, maximum mixed reviews is movieId = 53996, which is the movie titled 'Transformers (2007)'.
@@ -406,9 +404,11 @@ A few important conclusions from performing EDA and inferential statistics on th
 
 * We also realized that some SMART questions we developed were not answerable with statistical inference and hence weren't 'SMART' enough.   
 
-# References
+# References   
 
-Edwin, Lo (2019). Rmd Template File 'Chicken Wings Dataset Exploratory Data Analysis.
+1. Movielens. GroupLens. (2021, December 8). Retrieved November 3, 2022, from https://grouplens.org/datasets/movielens/   
 
-MovieLens Dataset (2022). Movie Ratings Dataset from March 1996 - September 2018. Department of Computer Science and Engineering, the University of Minnesota.
+2. Libretexts. (2022, April 24). 6.3: The law of large numbers. Statistics LibreTexts. Retrieved November 3, 2022, from https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/06%3A_Random_Samples/6.03%3A_The_Law_of_Large_Numbers   
+
+3. Edwin, Lo (2019). Rmd Template File 'Chicken Wings Dataset Exploratory Data Analysis.  
 

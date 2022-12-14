@@ -410,5 +410,4 @@ A few important conclusions from performing EDA and inferential statistics on th
 
 2. Libretexts. (2022, April 24). 6.3: The law of large numbers. Statistics LibreTexts. Retrieved November 3, 2022, from https://stats.libretexts.org/Bookshelves/Probability_Theory/Probability_Mathematical_Statistics_and_Stochastic_Processes_(Siegrist)/06%3A_Random_Samples/6.03%3A_The_Law_of_Large_Numbers   
 
-3. Edwin, Lo (2019). Rmd Template File 'Chicken Wings Dataset Exploratory Data Analysis.  
-
+3. Edwin, Lo (2019). Rmd Template File 'Chicken Wings Dataset Exploratory Data Analysis.
